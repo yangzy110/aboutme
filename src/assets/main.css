@@ -1,0 +1,22 @@
+@import './base.css';
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: #010a18 !important;
+}
+
+#app {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+}
+
