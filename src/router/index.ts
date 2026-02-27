@@ -22,11 +22,6 @@ const router = createRouter({
     {
       path: "/page/3",
       name: "page-3",
-      component: () => import("../views/Page3View.vue"),
-    },
-    {
-      path: "/page/4",
-      name: "page-4",
       component: () => import("../views/Page4View.vue"),
     },
   ],

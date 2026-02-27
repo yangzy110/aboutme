@@ -48,11 +48,11 @@ function createTextTexture(text: string, size = 256): THREE.CanvasTexture {
   cvs.height = size;
   const ctx = cvs.getContext("2d")!;
 
-  // 画框背景
-  ctx.fillStyle = "#1a1a2e";
+  // 木质相框背景
+  ctx.fillStyle = "#f5e6d0";
   ctx.fillRect(0, 0, size, size);
 
-  // 内部渐变
+  // 内部暖色渐变 — 模拟旧照片底色
   const grad = ctx.createRadialGradient(
     size / 2,
     size / 2,
@@ -61,18 +61,23 @@ function createTextTexture(text: string, size = 256): THREE.CanvasTexture {
     size / 2,
     size / 2,
   );
-  grad.addColorStop(0, "rgba(60,60,120,0.6)");
-  grad.addColorStop(1, "rgba(20,20,40,0.9)");
+  grad.addColorStop(0, "rgba(255,245,230,0.9)");
+  grad.addColorStop(1, "rgba(230,210,180,0.95)");
   ctx.fillStyle = grad;
   ctx.fillRect(8, 8, size - 16, size - 16);
 
-  // 画框边
-  ctx.strokeStyle = "rgba(180,160,120,0.8)";
-  ctx.lineWidth = 6;
+  // 木质相框边 — 深棕色
+  ctx.strokeStyle = "rgba(140,100,60,0.85)";
+  ctx.lineWidth = 7;
   ctx.strokeRect(4, 4, size - 8, size - 8);
-  ctx.strokeStyle = "rgba(220,200,160,0.4)";
+  ctx.strokeStyle = "rgba(180,140,90,0.5)";
   ctx.lineWidth = 2;
   ctx.strokeRect(12, 12, size - 24, size - 24);
+
+  // 内侧金色细线
+  ctx.strokeStyle = "rgba(210,180,120,0.4)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(16, 16, size - 32, size - 32);
 
   // emoji
   ctx.font = `${size * 0.45}px serif`;
@@ -94,10 +99,10 @@ function createArrowTexture(): THREE.CanvasTexture {
 
   ctx.clearRect(0, 0, size, size);
 
-  // 发光箭头
-  ctx.shadowColor = "rgba(140,200,255,0.9)";
+  // 暖金色发光箭头
+  ctx.shadowColor = "rgba(210,160,80,0.9)";
   ctx.shadowBlur = 20;
-  ctx.fillStyle = "rgba(200,230,255,0.95)";
+  ctx.fillStyle = "rgba(240,200,120,0.95)";
 
   ctx.beginPath();
   ctx.moveTo(size / 2, 15);
@@ -115,7 +120,7 @@ function createArrowTexture(): THREE.CanvasTexture {
   return tex;
 }
 
-let arrowMesh: THREE.Mesh;
+let arrowMesh: THREE.Sprite;
 let targetCamZ = 0;
 let currentCamZ = 0;
 
@@ -123,7 +128,7 @@ function init() {
   if (!canvasRef.value) return;
 
   scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x0a0a1a, 1, 22);
+  scene.fog = new THREE.Fog(0xf5e6d0, 2, 24);
 
   camera = new THREE.PerspectiveCamera(
     65,
@@ -142,21 +147,25 @@ function init() {
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setClearColor(0x0a0a1a);
+  renderer.setClearColor(0xf5e6d0);
 
-  // 光源
-  const ambient = new THREE.AmbientLight(0x334466, 0.6);
+  // 暖色光源 — 模拟午后阳光
+  const ambient = new THREE.AmbientLight(0xffe8c8, 0.8);
   scene.add(ambient);
 
-  const pointLight = new THREE.PointLight(0x6688cc, 1.5, 20);
+  const sunLight = new THREE.DirectionalLight(0xffd59e, 0.6);
+  sunLight.position.set(2, 4, -3);
+  scene.add(sunLight);
+
+  const pointLight = new THREE.PointLight(0xffcb8e, 1.2, 20);
   pointLight.position.set(0, 2.8, -2);
   scene.add(pointLight);
 
-  const pointLight2 = new THREE.PointLight(0x4466aa, 1.0, 20);
+  const pointLight2 = new THREE.PointLight(0xffc080, 0.8, 20);
   pointLight2.position.set(0, 2.8, -10);
   scene.add(pointLight2);
 
-  const pointLight3 = new THREE.PointLight(0x556699, 0.6, 20);
+  const pointLight3 = new THREE.PointLight(0xffb870, 0.5, 20);
   pointLight3.position.set(0, 2.8, -16);
   scene.add(pointLight3);
 
@@ -164,22 +173,22 @@ function init() {
   const hw = CORRIDOR_WIDTH / 2;
   const hh = CORRIDOR_HEIGHT;
 
-  // 地板
+  // 地板 — 木质暖色调
   const floorGeo = new THREE.PlaneGeometry(CORRIDOR_WIDTH, CORRIDOR_LENGTH);
   const floorMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1a2e,
-    roughness: 0.7,
-    metalness: 0.1,
+    color: 0xc8a882,
+    roughness: 0.75,
+    metalness: 0.05,
   });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(0, 0, -CORRIDOR_LENGTH / 2);
   scene.add(floor);
 
-  // 天花板
+  // 天花板 — 暖白
   const ceilGeo = new THREE.PlaneGeometry(CORRIDOR_WIDTH, CORRIDOR_LENGTH);
   const ceilMat = new THREE.MeshStandardMaterial({
-    color: 0x151528,
+    color: 0xf0e0cc,
     roughness: 0.9,
   });
   const ceil = new THREE.Mesh(ceilGeo, ceilMat);
@@ -187,11 +196,11 @@ function init() {
   ceil.position.set(0, hh, -CORRIDOR_LENGTH / 2);
   scene.add(ceil);
 
-  // 左墙
+  // 左墙 — 暖米色
   const wallGeo = new THREE.PlaneGeometry(CORRIDOR_LENGTH, hh);
   const wallMat = new THREE.MeshStandardMaterial({
-    color: 0x16162a,
-    roughness: 0.8,
+    color: 0xe8d5b8,
+    roughness: 0.85,
   });
   const leftWall = new THREE.Mesh(wallGeo, wallMat);
   leftWall.rotation.y = Math.PI / 2;
@@ -204,22 +213,22 @@ function init() {
   rightWall.position.set(hw, hh / 2, -CORRIDOR_LENGTH / 2);
   scene.add(rightWall);
 
-  // 尽头墙
+  // 尽头墙 — 稍深暖色
   const backGeo = new THREE.PlaneGeometry(CORRIDOR_WIDTH, hh);
   const backMat = new THREE.MeshStandardMaterial({
-    color: 0x0d0d20,
+    color: 0xd4be9a,
     roughness: 0.9,
   });
   const backWall = new THREE.Mesh(backGeo, backMat);
   backWall.position.set(0, hh / 2, -CORRIDOR_LENGTH);
   scene.add(backWall);
 
-  // 走廊灯带（顶部边缘装饰线）
+  // 走廊灯带（顶部边缘装饰线）— 暖金色
   const stripGeo = new THREE.BoxGeometry(0.05, 0.05, CORRIDOR_LENGTH);
   const stripMat = new THREE.MeshBasicMaterial({
-    color: 0x4488cc,
+    color: 0xd4a050,
     transparent: true,
-    opacity: 0.3,
+    opacity: 0.35,
   });
   const stripL = new THREE.Mesh(stripGeo, stripMat);
   stripL.position.set(-hw + 0.03, hh - 0.03, -CORRIDOR_LENGTH / 2);
@@ -278,7 +287,8 @@ function tick() {
   if (arrowMesh) {
     arrowMesh.visible = show;
     if (show) {
-      arrowMesh.material.opacity = 0.5 + Math.sin(time * 2.5) * 0.3;
+      (arrowMesh.material as THREE.SpriteMaterial).opacity =
+        0.5 + Math.sin(time * 2.5) * 0.3;
       arrowMesh.position.z = -CORRIDOR_LENGTH + 1 + Math.sin(time * 1.5) * 0.15;
     }
   }
@@ -380,7 +390,7 @@ onBeforeUnmount(() => {
   height: 100vh;
   overflow: hidden;
   position: relative;
-  background: #0a0a1a;
+  background: #f5e6d0;
   cursor: pointer;
 }
 
@@ -389,6 +399,43 @@ onBeforeUnmount(() => {
   inset: 0;
   width: 100%;
   height: 100%;
+}
+
+/* ── 暖光光晕覆盖层 ── */
+.page1::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 60% 40% at 30% 20%,
+      rgba(255, 220, 150, 0.15) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 50% 50% at 75% 30%,
+      rgba(255, 200, 120, 0.1) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 80% 30% at 50% 90%,
+      rgba(200, 160, 100, 0.08) 0%,
+      transparent 50%
+    );
+}
+
+/* ── 淡淡的胶片颗粒感 ── */
+.page1::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
 }
 
 /* ── 底部控制栏 ── */
@@ -404,22 +451,22 @@ onBeforeUnmount(() => {
 }
 
 .hint {
-  color: rgba(180, 210, 255, 0.85);
+  color: rgba(120, 80, 40, 0.85);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.1em;
   padding: 10px 22px;
   border-radius: 999px;
-  background: rgba(10, 10, 30, 0.65);
+  background: rgba(255, 245, 230, 0.75);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(100, 150, 220, 0.25);
+  border: 1px solid rgba(180, 140, 80, 0.3);
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
 }
 .hint--end {
-  color: rgba(255, 200, 120, 0.85);
-  border-color: rgba(200, 160, 80, 0.3);
+  color: rgba(160, 100, 30, 0.9);
+  border-color: rgba(200, 150, 60, 0.4);
 }
 
 /* 通用控制按钮 */
@@ -435,28 +482,28 @@ onBeforeUnmount(() => {
   backdrop-filter: blur(12px);
 }
 
-/* 后退按钮 —— 冷蓝调 */
+/* 后退按钮 —— 暖棕调 */
 .ctrl-btn--retreat {
-  background: rgba(60, 90, 160, 0.25);
-  border: 1px solid rgba(120, 170, 240, 0.35);
-  color: rgba(160, 200, 255, 0.9);
+  background: rgba(180, 140, 80, 0.2);
+  border: 1px solid rgba(180, 140, 80, 0.4);
+  color: rgba(120, 80, 40, 0.9);
 }
 .ctrl-btn--retreat:hover {
-  background: rgba(80, 120, 200, 0.4);
-  border-color: rgba(160, 200, 255, 0.55);
-  color: #fff;
+  background: rgba(180, 140, 80, 0.35);
+  border-color: rgba(160, 120, 60, 0.6);
+  color: rgba(100, 60, 20, 1);
 }
 
-/* 离开按钮 —— 暖琥珀调，与提示冷色形成对比 */
+/* 离开按钮 —— 暖琥珀调 */
 .ctrl-btn--exit {
-  background: rgba(140, 90, 20, 0.25);
-  border: 1px solid rgba(220, 160, 60, 0.35);
-  color: rgba(255, 200, 100, 0.9);
+  background: rgba(180, 120, 50, 0.2);
+  border: 1px solid rgba(200, 150, 60, 0.4);
+  color: rgba(160, 100, 30, 0.9);
 }
 .ctrl-btn--exit:hover {
-  background: rgba(180, 120, 30, 0.4);
-  border-color: rgba(255, 200, 80, 0.6);
-  color: #ffe080;
+  background: rgba(200, 140, 50, 0.35);
+  border-color: rgba(220, 170, 60, 0.6);
+  color: rgba(140, 80, 10, 1);
 }
 
 .fade-enter-active,

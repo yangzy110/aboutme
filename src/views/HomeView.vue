@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import OceanParticleBurst from "@/components/OceanParticleBurst.vue";
 import GalaxySpeedLines from "@/components/GalaxySpeedLines.vue";
@@ -9,6 +9,49 @@ const menuOpen = ref(false);
 const hoveredIndex = ref<number | null>(null);
 const bubbleHovered = ref(false);
 
+// 彩蛋
+const showMaleMermaid = ref(false);
+const showFemaleMermaid = ref(false);
+const showAlien = ref(false);
+const showUfo = ref(false);
+let eggTimer2: ReturnType<typeof setTimeout> | null = null;
+let eggTimer4: ReturnType<typeof setTimeout> | null = null;
+
+function onBubbleEnter() {
+  bubbleHovered.value = true;
+  if (theme.value === "ocean") {
+    eggTimer2 = setTimeout(() => {
+      showMaleMermaid.value = true;
+    }, 2000);
+    eggTimer4 = setTimeout(() => {
+      showFemaleMermaid.value = true;
+    }, 4000);
+  } else {
+    eggTimer2 = setTimeout(() => {
+      showAlien.value = true;
+    }, 2000);
+    eggTimer4 = setTimeout(() => {
+      showUfo.value = true;
+    }, 4000);
+  }
+}
+
+function onBubbleLeave() {
+  bubbleHovered.value = false;
+  if (eggTimer2) {
+    clearTimeout(eggTimer2);
+    eggTimer2 = null;
+  }
+  if (eggTimer4) {
+    clearTimeout(eggTimer4);
+    eggTimer4 = null;
+  }
+  showMaleMermaid.value = false;
+  showFemaleMermaid.value = false;
+  showAlien.value = false;
+  showUfo.value = false;
+}
+
 // 主题切换
 type Theme = "ocean" | "galaxy";
 const theme = ref<Theme>("ocean");
@@ -17,10 +60,9 @@ function toggleTheme() {
 }
 
 const pages = [
-  { id: 1, label: "页面 1" },
-  { id: 2, label: "页面 2" },
-  { id: 3, label: "页面 3" },
-  { id: 4, label: "页面 4" },
+  { id: 1, label: "学业" },
+  { id: 2, label: "事业" },
+  { id: 3, label: "生活" },
 ];
 
 function randBetween(min: number, max: number) {
@@ -197,6 +239,26 @@ function openMenu() {
   if (!menuOpen.value) menuOpen.value = true;
 }
 
+function closeMenu() {
+  if (menuOpen.value) menuOpen.value = false;
+}
+
+// 点击外部关闭菜单
+function onClickOutside(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  // 如果点击的是菜单区域内（SVG扇形或泡泡）则不关闭
+  if (target.closest(".radial-svg") || target.closest(".bubble")) return;
+  closeMenu();
+}
+
+onMounted(() => {
+  document.addEventListener("click", onClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", onClickOutside);
+});
+
 function goToPage(id: number) {
   router.push(`/page/${id}`);
 }
@@ -274,87 +336,21 @@ function goToPage(id: number) {
           viewBox="-240 -240 480 480"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <!-- SVG 定义：渐变 & 滤镜 -->
+          <!-- SVG 定义：渐变 -->
           <defs>
-            <!-- 从圆心向外的白色光晕渐变（模拟磨砂玻璃透光） -->
+            <!-- 毛玻璃径向渐变 -->
             <radialGradient
-              id="glass-shine"
+              id="glass-fill"
               cx="0"
               cy="0"
               r="220"
               gradientUnits="userSpaceOnUse"
             >
-              <stop offset="0%" stop-color="white" stop-opacity="0.28" />
-              <stop offset="55%" stop-color="white" stop-opacity="0.09" />
+              <stop offset="0%" stop-color="white" stop-opacity="0.12" />
+              <stop offset="60%" stop-color="white" stop-opacity="0.06" />
               <stop offset="100%" stop-color="white" stop-opacity="0.02" />
             </radialGradient>
-
-            <!-- 外边缘顶部反光渐变 -->
-            <radialGradient
-              id="edge-shine"
-              cx="0"
-              cy="-1"
-              r="230"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop offset="80%" stop-color="white" stop-opacity="0" />
-              <stop offset="100%" stop-color="white" stop-opacity="0.55" />
-            </radialGradient>
-
-            <!-- 悬浮辉光滤镜 -->
-            <filter
-              id="glow-filter"
-              x="-25%"
-              y="-25%"
-              width="150%"
-              height="150%"
-            >
-              <feGaussianBlur in="SourceAlpha" stdDeviation="7" result="blur" />
-              <feColorMatrix
-                in="blur"
-                type="matrix"
-                values="0 0 0 0 0.4  0 0 0 0 0.7  0 0 0 0 1  0 0 0 0.8 0"
-                result="colorBlur"
-              />
-              <feMerge>
-                <feMergeNode in="colorBlur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-
-            <!-- 装饰环渐变 -->
-            <linearGradient id="ring-grad" x1="0" y1="-1" x2="0" y2="1">
-              <stop offset="0%" stop-color="rgba(255,255,255,0.25)" />
-              <stop offset="100%" stop-color="rgba(255,255,255,0.04)" />
-            </linearGradient>
           </defs>
-
-          <!-- 装饰环 -->
-          <circle
-            cx="0"
-            cy="0"
-            :r="OUTER_R + 22"
-            fill="none"
-            stroke="url(#ring-grad)"
-            stroke-width="1.2"
-          />
-          <circle
-            cx="0"
-            cy="0"
-            :r="INNER_R - 8"
-            fill="none"
-            stroke="rgba(255,255,255,0.12)"
-            stroke-width="1"
-          />
-          <!-- 外圈淡光晕 -->
-          <circle
-            cx="0"
-            cy="0"
-            :r="OUTER_R + 28"
-            fill="none"
-            stroke="rgba(120,180,255,0.08)"
-            stroke-width="8"
-          />
 
           <g
             v-for="(page, i) in pages"
@@ -367,55 +363,36 @@ function goToPage(id: number) {
             @click="goToPage(page.id)"
             style="cursor: pointer"
           >
-            <!-- 1. 底色层 -->
+            <!-- 毛玻璃底色 -->
             <path
-              :d="getTrapPath(i, hoveredIndex === i ? 12 : 0)"
-              :fill="sectorColors[i]"
-              stroke="none"
+              :d="getTrapPath(i)"
+              :fill="
+                hoveredIndex === i
+                  ? sectorColors[i].replace('0.18', '0.28')
+                  : sectorColors[i]
+              "
+              style="transition: fill 0.3s ease"
             />
 
-            <!-- 2. 白色光晕层（磨砂玻璃透光） -->
+            <!-- 玻璃光泽叠层 -->
             <path
-              :d="getTrapPath(i, hoveredIndex === i ? 12 : 0)"
-              fill="url(#glass-shine)"
-              :opacity="hoveredIndex === i ? 0.85 : 0.5"
-              stroke="none"
-              style="transition: opacity 0.25s ease"
+              :d="getTrapPath(i)"
+              fill="url(#glass-fill)"
+              :opacity="hoveredIndex === i ? 1 : 0.6"
+              style="transition: opacity 0.3s ease"
             />
 
-            <!-- 3. 边框 -->
+            <!-- 极细边框（仅hover时微微显现） -->
             <path
-              :d="getTrapPath(i, hoveredIndex === i ? 12 : 0)"
+              :d="getTrapPath(i)"
               fill="none"
               :stroke="
                 hoveredIndex === i
-                  ? 'rgba(255,255,255,0.6)'
-                  : 'rgba(255,255,255,0.2)'
+                  ? 'rgba(255,255,255,0.30)'
+                  : 'rgba(255,255,255,0.08)'
               "
-              stroke-width="1"
-              style="transition: all 0.25s ease"
-            />
-
-            <!-- 4. 外弧顶部高光线 -->
-            <path
-              :d="getOuterArcPath(i, hoveredIndex === i ? 12 : 0)"
-              fill="none"
-              :stroke="
-                hoveredIndex === i
-                  ? 'rgba(255,255,255,0.9)'
-                  : 'rgba(255,255,255,0.38)'
-              "
-              :stroke-width="hoveredIndex === i ? 2.5 : 1.5"
-              stroke-linecap="round"
-              style="transition: all 0.25s ease"
-            />
-
-            <!-- 5. 悬浮彩色辉光层 -->
-            <path
-              v-if="hoveredIndex === i"
-              :d="getTrapPath(i, 12)"
-              :fill="sectorGlowColors[i]"
-              opacity="0.15"
+              stroke-width="0.8"
+              style="transition: stroke 0.3s ease"
             />
 
             <!-- 6. 年份标签 -->
@@ -445,13 +422,37 @@ function goToPage(id: number) {
         class="bubble"
         :class="{ 'bubble--open': menuOpen }"
         @click="openMenu"
-        @mouseenter="bubbleHovered = true"
-        @mouseleave="bubbleHovered = false"
+        @mouseenter="onBubbleEnter"
+        @mouseleave="onBubbleLeave"
       >
         <div class="bubble-shine" />
         <span class="bubble-text">{{ menuOpen ? "" : "START" }}</span>
       </div>
     </div>
+
+    <!-- 海洋彩蛋：美人鱼 -->
+    <Transition name="mermaid-rise">
+      <div v-if="showMaleMermaid" class="mermaid-male">
+        <span>🧜‍♂️</span>
+      </div>
+    </Transition>
+    <Transition name="mermaid-right">
+      <div v-if="showFemaleMermaid" class="mermaid-female">
+        <span>🧜‍♀️</span>
+      </div>
+    </Transition>
+
+    <!-- 星河彩蛋：外星人 & 飞碑 -->
+    <Transition name="alien-in">
+      <div v-if="showAlien" class="alien-egg">
+        <span>👽</span>
+      </div>
+    </Transition>
+    <Transition name="ufo-in">
+      <div v-if="showUfo" class="ufo-egg">
+        <span>🛸</span>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -463,13 +464,14 @@ function goToPage(id: number) {
   position: relative;
   background: linear-gradient(
     180deg,
-    #010a18 0%,
-    #021530 20%,
-    #03244f 40%,
-    #063866 60%,
-    #0a5280 78%,
-    #126896 90%,
-    #1a7faf 100%
+    #021a30 0%,
+    #063a5c 15%,
+    #0b5a8a 32%,
+    #1278a8 48%,
+    #1a92c2 62%,
+    #22a8d8 76%,
+    #2bbce8 88%,
+    #38caf0 100%
   );
   display: flex;
   align-items: center;
@@ -691,6 +693,205 @@ function goToPage(id: number) {
 }
 
 /* ========================
+   美人鱼彩蛋
+======================== */
+
+/* 男美人鱼：超大，底部冒出，下半截藏在屏幕底边外，位于左侧 */
+.mermaid-male {
+  position: absolute;
+  left: 60px;
+  bottom: -100px; /* 下半截（约200px）藏在底边外 */
+  pointer-events: none;
+  z-index: 50;
+  animation: mermaid-bob-bottom 3.2s ease-in-out infinite;
+}
+.mermaid-male span {
+  font-size: 380px;
+  line-height: 1;
+  display: block;
+  filter: drop-shadow(0 0 40px rgba(60, 180, 255, 0.75))
+    drop-shadow(0 0 80px rgba(30, 120, 255, 0.4));
+}
+
+/* 女美人鱼：较大，整体显示在右侧 */
+.mermaid-female {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  margin-top: -90px; /* 垂直居中偏移 */
+  pointer-events: none;
+  z-index: 50;
+  animation: mermaid-bob 3s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+.mermaid-female span {
+  font-size: 180px;
+  line-height: 1;
+  display: block;
+  filter: drop-shadow(0 0 24px rgba(200, 120, 255, 0.7))
+    drop-shadow(0 0 50px rgba(160, 80, 255, 0.35));
+}
+
+/* Male bob：在底部上下浮动（负Y = 向上冒） */
+@keyframes mermaid-bob-bottom {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-28px);
+  }
+}
+
+/* Female bob */
+@keyframes mermaid-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-22px);
+  }
+}
+
+/* 男鱼：从底部冒出 */
+.mermaid-rise-enter-active {
+  transition:
+    opacity 0.5s ease,
+    transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.mermaid-rise-leave-active {
+  transition:
+    opacity 0.35s ease-in,
+    transform 0.35s ease-in;
+}
+.mermaid-rise-enter-from {
+  opacity: 0;
+  transform: translateY(120px);
+}
+.mermaid-rise-leave-to {
+  opacity: 0;
+  transform: translateY(100px);
+}
+
+/* 女鱼：从右侧滑入 */
+.mermaid-right-enter-active {
+  transition:
+    opacity 0.5s ease,
+    transform 0.65s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.mermaid-right-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease-in;
+}
+.mermaid-right-enter-from {
+  opacity: 0;
+  transform: translateX(80px);
+}
+.mermaid-right-leave-to {
+  opacity: 0;
+  transform: translateX(60px);
+}
+
+/* ========================
+   星河彩蛋：外星人 & 飞碑
+======================== */
+.alien-egg {
+  position: absolute;
+  left: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 50;
+  animation: alien-float 3s ease-in-out infinite;
+}
+.alien-egg span {
+  font-size: 120px;
+  line-height: 1;
+  display: block;
+  filter: drop-shadow(0 0 30px rgba(140, 255, 160, 0.7))
+    drop-shadow(0 0 60px rgba(80, 220, 120, 0.3));
+}
+
+.ufo-egg {
+  position: absolute;
+  right: 60px;
+  top: 38%;
+  pointer-events: none;
+  z-index: 50;
+  animation: ufo-hover 2.5s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+.ufo-egg span {
+  font-size: 140px;
+  line-height: 1;
+  display: block;
+  filter: drop-shadow(0 0 24px rgba(180, 160, 255, 0.7))
+    drop-shadow(0 0 50px rgba(120, 100, 255, 0.35));
+}
+
+@keyframes alien-float {
+  0%,
+  100% {
+    transform: translateY(-50%);
+  }
+  50% {
+    transform: translateY(calc(-50% - 16px));
+  }
+}
+
+@keyframes ufo-hover {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(3deg);
+  }
+}
+
+/* 外星人：从左侧淡入 */
+.alien-in-enter-active {
+  transition:
+    opacity 0.5s ease,
+    transform 0.65s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.alien-in-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease-in;
+}
+.alien-in-enter-from {
+  opacity: 0;
+  transform: translateX(-60px) translateY(-50%);
+}
+.alien-in-leave-to {
+  opacity: 0;
+  transform: translateX(-40px) translateY(-50%);
+}
+
+/* 飞碑：从右侧飞入 */
+.ufo-in-enter-active {
+  transition:
+    opacity 0.5s ease,
+    transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.ufo-in-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease-in;
+}
+.ufo-in-enter-from {
+  opacity: 0;
+  transform: translateX(80px) rotate(10deg);
+}
+.ufo-in-leave-to {
+  opacity: 0;
+  transform: translateX(60px) rotate(5deg);
+}
+
+/* ========================
    星河模式
 ======================== */
 .galaxy-layer {
@@ -888,7 +1089,7 @@ function goToPage(id: number) {
 }
 
 .sector-group:hover {
-  filter: url(#glow-filter);
+  filter: drop-shadow(0 0 12px rgba(120, 180, 255, 0.25));
 }
 
 @keyframes sector-in {
@@ -907,18 +1108,17 @@ function goToPage(id: number) {
 }
 
 .sector-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-  fill: rgba(255, 255, 255, 0.78);
-  letter-spacing: 1px;
+  fill: rgba(255, 255, 255, 0.85);
+  letter-spacing: 2px;
   font-family: inherit;
-  transition: all 0.22s ease;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s ease;
 }
 .sector-label--hover {
   fill: #ffffff;
-  font-size: 13.5px;
-  letter-spacing: 1.5px;
+  font-size: 15px;
+  letter-spacing: 2.5px;
 }
 
 .menu-enter-active {
@@ -936,75 +1136,77 @@ function goToPage(id: number) {
 .bubble {
   position: relative;
   z-index: 10;
-  width: 160px;
-  height: 160px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   background: radial-gradient(
-    ellipse at 35% 32%,
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(180, 220, 255, 0.07) 55%,
-    rgba(100, 180, 255, 0.03) 100%
+    ellipse at 38% 35%,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(160, 215, 255, 0.1) 40%,
+    rgba(80, 170, 255, 0.04) 70%,
+    transparent 100%
   );
-  border: 1.5px solid rgba(255, 255, 255, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   box-shadow:
-    inset 0 0 30px rgba(255, 255, 255, 0.05),
-    0 0 60px rgba(30, 120, 220, 0.3),
-    0 0 0 8px rgba(120, 180, 255, 0.05),
-    0 0 0 16px rgba(120, 180, 255, 0.03);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+    inset 0 0 24px rgba(255, 255, 255, 0.06),
+    0 0 40px rgba(60, 160, 255, 0.2),
+    0 0 80px rgba(40, 130, 240, 0.1);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   transition:
     transform 0.4s cubic-bezier(0.34, 1.5, 0.64, 1),
-    box-shadow 0.4s ease;
+    box-shadow 0.5s ease,
+    border-color 0.4s ease;
 }
 
 .bubble:hover:not(.bubble--open) {
-  transform: scale(1.1);
+  transform: scale(1.08);
+  border-color: rgba(255, 255, 255, 0.35);
   box-shadow:
-    inset 0 0 40px rgba(255, 255, 255, 0.1),
-    0 0 80px rgba(60, 150, 255, 0.5),
-    0 0 0 10px rgba(120, 180, 255, 0.07),
-    0 0 0 20px rgba(120, 180, 255, 0.04);
+    inset 0 0 30px rgba(255, 255, 255, 0.08),
+    0 0 60px rgba(80, 180, 255, 0.35),
+    0 0 120px rgba(50, 150, 255, 0.15);
 }
 
 .bubble--open {
   cursor: default;
+  border-color: rgba(255, 255, 255, 0.12);
   box-shadow:
-    inset 0 0 50px rgba(255, 255, 255, 0.08),
-    0 0 100px rgba(30, 120, 220, 0.5),
-    0 0 0 8px rgba(120, 180, 255, 0.06),
-    0 0 0 16px rgba(120, 180, 255, 0.03);
+    inset 0 0 30px rgba(255, 255, 255, 0.05),
+    0 0 50px rgba(40, 140, 240, 0.25),
+    0 0 100px rgba(30, 120, 220, 0.1);
 }
 
 /* 泡泡高光 */
 .bubble-shine {
   position: absolute;
-  top: 16%;
-  left: 18%;
-  width: 38%;
-  height: 28%;
+  top: 14%;
+  left: 16%;
+  width: 34%;
+  height: 24%;
   border-radius: 50%;
   background: radial-gradient(
     ellipse,
-    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
     transparent 100%
   );
   pointer-events: none;
-  transform: rotate(-20deg);
+  transform: rotate(-25deg);
 }
 
 .bubble-text {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.95);
-  letter-spacing: 0.2em;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.18em;
   text-shadow:
-    0 0 24px rgba(160, 220, 255, 0.9),
-    0 2px 6px rgba(0, 0, 0, 0.25);
+    0 0 16px rgba(160, 220, 255, 0.7),
+    0 1px 4px rgba(0, 0, 0, 0.2);
   user-select: none;
   position: relative;
   z-index: 1;
