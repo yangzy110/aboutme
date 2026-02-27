@@ -1,0 +1,1 @@
+import{B as e,C as t,a as n,h as r,t as i,v as a,vt as o}from"./_plugin-vue_export-helper-CS6S8KnL.js";var s={class:`page3`},c=i(t({__name:`Page3View`,setup(t){let i=n();return(t,n)=>(e(),a(`div`,s,[r(`button`,{class:`back-btn`,onClick:n[0]||=e=>o(i).push(`/`)},`← 返回`)]))}}),[[`__scopeId`,`data-v-28c6b278`]]);export{c as default};
