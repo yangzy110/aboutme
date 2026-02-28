@@ -1,0 +1,318 @@
+/**
+ * HomeView 3D 侧面板样式
+ */
+
+.side-panel {
+  position: absolute;
+  top: 50%;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  opacity: 0;
+  transition:
+    opacity 1s ease,
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  perspective: 1000px;
+}
+
+.side-left {
+  left: 28px;
+  transform: translateY(-50%) translateX(-60px);
+}
+
+.side-right {
+  right: 28px;
+  align-items: flex-end;
+  transform: translateY(-50%) translateX(60px);
+}
+
+.side--visible {
+  opacity: 1;
+}
+
+.side--visible.side-left {
+  transform: translateY(-50%) translateX(0);
+}
+
+.side--visible.side-right {
+  transform: translateY(-50%) translateX(0);
+}
+
+.side--hide {
+  opacity: 0 !important;
+  transition: opacity 0.4s ease !important;
+}
+
+/* 3D 透视容器 */
+.panel-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.panel-3d-left {
+  transform: rotateY(12deg) rotateX(-2deg);
+}
+
+.panel-3d-right {
+  transform: rotateY(-12deg) rotateX(-2deg);
+}
+
+.side--visible .panel-3d-left {
+  animation: panel-float-left 8s ease-in-out infinite;
+}
+
+.side--visible .panel-3d-right {
+  animation: panel-float-right 8s ease-in-out infinite;
+}
+
+@keyframes panel-float-left {
+  0%, 100% { transform: rotateY(12deg) rotateX(-2deg) translateZ(0); }
+  50% { transform: rotateY(14deg) rotateX(-1deg) translateZ(8px); }
+}
+
+@keyframes panel-float-right {
+  0%, 100% { transform: rotateY(-12deg) rotateX(-2deg) translateZ(0); }
+  50% { transform: rotateY(-14deg) rotateX(-1deg) translateZ(8px); }
+}
+
+/* 毛玻璃面板 */
+.panel-glass {
+  position: relative;
+  padding: 20px 24px;
+  min-width: 180px;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 229, 255, 0.06) 0%,
+    rgba(0, 150, 255, 0.03) 50%,
+    rgba(0, 100, 200, 0.02) 100%
+  );
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  border-radius: 6px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(0, 229, 255, 0.1);
+  overflow: hidden;
+}
+
+.panel-glass--purple {
+  background: linear-gradient(
+    135deg,
+    rgba(180, 140, 255, 0.06) 0%,
+    rgba(140, 100, 255, 0.03) 50%,
+    rgba(100, 80, 200, 0.02) 100%
+  );
+  border-color: rgba(180, 140, 255, 0.15);
+  box-shadow:
+    0 0 30px rgba(180, 140, 255, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(180, 140, 255, 0.1);
+}
+
+/* 面板发光边 */
+.panel-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
+
+.panel-edge-left {
+  left: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 5%,
+    rgba(0, 229, 255, 0.4) 30%,
+    rgba(0, 229, 255, 0.15) 50%,
+    rgba(0, 229, 255, 0.4) 70%,
+    transparent 95%
+  );
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+.panel-edge-right {
+  right: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 5%,
+    rgba(180, 140, 255, 0.4) 30%,
+    rgba(180, 140, 255, 0.15) 50%,
+    rgba(180, 140, 255, 0.4) 70%,
+    transparent 95%
+  );
+  box-shadow: 0 0 8px rgba(180, 140, 255, 0.3);
+}
+
+/* 面板标题栏 */
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+}
+
+.panel-header--right {
+  justify-content: flex-end;
+  border-bottom-color: rgba(180, 140, 255, 0.1);
+}
+
+.panel-title {
+  font-family: 'Courier New', 'SF Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(0, 229, 255, 0.6);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.panel-title--purple {
+  color: rgba(180, 140, 255, 0.6);
+}
+
+.panel-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(0, 229, 255, 0.8);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+  animation: indicator-pulse 2s ease-in-out infinite;
+}
+
+.panel-indicator--purple {
+  background: rgba(180, 140, 255, 0.8);
+  box-shadow: 0 0 8px rgba(180, 140, 255, 0.6);
+}
+
+@keyframes indicator-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* 左侧数据流 */
+.data-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stream-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: stream-fade-in 0.5s ease forwards;
+}
+
+.stream-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(0, 229, 255, 0.8);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+  flex-shrink: 0;
+  animation: dot-pulse 2.5s ease-in-out infinite;
+}
+
+.stream-text {
+  font-family: 'Courier New', 'SF Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  color: rgba(0, 229, 255, 0.55);
+  white-space: nowrap;
+}
+
+@keyframes stream-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px) translateZ(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateZ(0);
+  }
+}
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* 右侧技术栈 */
+.tech-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tech-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: tech-fade-in 0.5s ease forwards;
+}
+
+.tech-name {
+  font-family: 'Courier New', 'SF Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: rgba(180, 140, 255, 0.65);
+  white-space: nowrap;
+  min-width: 72px;
+}
+
+.tech-bar {
+  width: 90px;
+  height: 4px;
+  background: rgba(180, 140, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.tech-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(180, 140, 255, 0.2) 0%,
+    rgba(180, 140, 255, 0.7) 100%
+  );
+  box-shadow: 0 0 8px rgba(180, 140, 255, 0.4);
+  animation: bar-grow 1s ease forwards;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.tech-pct {
+  font-family: 'Courier New', 'SF Mono', monospace;
+  font-size: 11px;
+  color: rgba(180, 140, 255, 0.4);
+  min-width: 28px;
+  text-align: right;
+}
+
+@keyframes tech-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px) translateZ(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateZ(0);
+  }
+}
+
+@keyframes bar-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}

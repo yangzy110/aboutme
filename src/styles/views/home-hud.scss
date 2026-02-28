@@ -1,0 +1,135 @@
+/**
+ * HomeView 电影式暗幕 + HUD 样式
+ */
+
+/* 电影式暗幕 */
+.curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: #000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 24px 32px;
+}
+
+.curtain-enter-active,
+.curtain-leave-active {
+  transition: opacity 1s ease;
+}
+
+.curtain-leave-to {
+  opacity: 0;
+}
+
+.curtain-init {
+  font-family: 'Courier New', 'SF Mono', monospace;
+  font-size: 13px;
+  color: rgba(0, 229, 255, 0.5);
+  letter-spacing: 2px;
+  animation: init-blink 1s step-end infinite;
+}
+
+@keyframes init-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 229, 255, 0.15) 20%,
+    rgba(0, 229, 255, 0.6) 50%,
+    rgba(0, 229, 255, 0.15) 80%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 20px rgba(0, 229, 255, 0.4),
+    0 0 60px rgba(0, 229, 255, 0.15);
+  animation: scan-sweep 0.8s ease-in-out forwards;
+}
+
+@keyframes scan-sweep {
+  from { top: 0; }
+  to { top: 100%; }
+}
+
+/* HUD 装饰层 */
+.hud-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.hud--visible {
+  opacity: 1;
+}
+
+.hud-corner {
+  position: absolute;
+}
+
+.hud-tl { top: 16px; left: 16px; }
+.hud-tr { top: 16px; right: 16px; }
+.hud-bl { bottom: 16px; left: 16px; }
+.hud-br { bottom: 16px; right: 16px; }
+
+.hud-data {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: 'Courier New', 'SF Mono', monospace;
+}
+
+.hud-data-left {
+  bottom: 40px;
+  left: 28px;
+}
+
+.hud-data-right {
+  bottom: 40px;
+  right: 28px;
+  text-align: right;
+  align-items: flex-end;
+}
+
+.hud-label {
+  font-size: 10px;
+  color: rgba(0, 229, 255, 0.4);
+  letter-spacing: 2px;
+}
+
+.hud-value {
+  font-size: 13px;
+  color: rgba(0, 229, 255, 0.65);
+  letter-spacing: 1px;
+}
+
+.hud-line {
+  position: absolute;
+  left: 5%;
+  width: 90%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 229, 255, 0.1) 15%,
+    rgba(0, 229, 255, 0.15) 50%,
+    rgba(0, 229, 255, 0.1) 85%,
+    transparent 100%
+  );
+}
+
+.hud-line-top { top: 60px; }
+.hud-line-bottom { bottom: 60px; }

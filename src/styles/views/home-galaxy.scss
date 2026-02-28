@@ -1,0 +1,157 @@
+/**
+ * HomeView 星河模式样式
+ */
+
+.galaxy-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* 星云带 */
+.nebula-band {
+  position: absolute;
+  width: 220%;
+  left: -60%;
+  pointer-events: none;
+  filter: blur(38px);
+}
+
+.band-1 {
+  height: 30%;
+  top: 20%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(110, 60, 200, 0.07) 20%,
+    rgba(160, 100, 255, 0.12) 42%,
+    rgba(200, 140, 255, 0.09) 58%,
+    rgba(80, 120, 220, 0.06) 78%,
+    transparent 100%
+  );
+  animation: nebula-drift-1 28s ease-in-out infinite alternate;
+}
+
+.band-2 {
+  height: 22%;
+  top: 44%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(60, 80, 200, 0.05) 25%,
+    rgba(100, 180, 255, 0.1) 48%,
+    rgba(60, 140, 210, 0.07) 70%,
+    transparent 100%
+  );
+  animation: nebula-drift-2 22s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes nebula-drift-1 {
+  from { transform: rotate(-22deg) translateX(-2%); }
+  to { transform: rotate(-22deg) translateX(2%); }
+}
+
+@keyframes nebula-drift-2 {
+  from { transform: rotate(-16deg) translateX(-3%); }
+  to { transform: rotate(-16deg) translateX(3%); }
+}
+
+/* 浮动星粒 */
+.float-star {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(200, 220, 255, 0.6) 45%,
+    transparent 100%
+  );
+  opacity: var(--star-opacity, 0.6);
+  animation:
+    star-drift linear infinite,
+    star-twinkle ease-in-out infinite alternate;
+  animation-duration: inherit, var(--twinkle-dur, 3s);
+  will-change: transform, opacity;
+}
+
+@keyframes star-drift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(var(--dx), calc(var(--dy) * 0.4)); }
+  50% { transform: translate(calc(var(--dx) * 0.3), var(--dy)); }
+  75% { transform: translate(calc(var(--dx) * -0.5), calc(var(--dy) * 0.6)); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes star-twinkle {
+  from { opacity: calc(var(--star-opacity, 0.6) * 0.4); }
+  to { opacity: var(--star-opacity, 0.6); }
+}
+
+/* 流星雨 */
+.meteor {
+  position: absolute;
+  width: var(--length, 200px);
+  height: 2px;
+  transform-origin: 50% 50%;
+  background: linear-gradient(
+    to left,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(200, 225, 255, 0.15) 30%,
+    rgba(220, 240, 255, 0.6) 65%,
+    rgba(255, 255, 255, 0.95) 88%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border-radius: 2px 0 0 2px;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: meteor-shower linear infinite;
+  animation-duration: inherit;
+  filter: drop-shadow(0 0 2px rgba(220, 235, 255, 1))
+    drop-shadow(0 0 8px rgba(180, 210, 255, 0.7))
+    drop-shadow(0 0 18px rgba(140, 190, 255, 0.4));
+}
+
+.meteor::after {
+  content: '';
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(210, 235, 255, 0.85) 20%,
+    rgba(170, 215, 255, 0.5) 50%,
+    rgba(130, 190, 255, 0.15) 75%,
+    transparent 100%
+  );
+  filter: blur(2.5px);
+  box-shadow:
+    0 0 6px 3px rgba(255, 255, 255, 0.9),
+    0 0 14px 6px rgba(180, 220, 255, 0.6),
+    0 0 28px 10px rgba(140, 200, 255, 0.25);
+}
+
+@keyframes meteor-shower {
+  0%, 62% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(-45deg);
+  }
+  62.2% {
+    opacity: var(--opacity, 1);
+    transform: translate(0, 0) rotate(-45deg);
+  }
+  80% {
+    opacity: 0;
+    transform: translate(-130vw, 130vw) rotate(-45deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-130vw, 130vw) rotate(-45deg);
+  }
+}
