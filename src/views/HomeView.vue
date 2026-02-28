@@ -1,17 +1,133 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, type Ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-import OceanParticleBurst from "@/components/OceanParticleBurst.vue";
 import GalaxySpeedLines from "@/components/GalaxySpeedLines.vue";
+import MouseParticles from "@/components/MouseParticles.vue";
 
 const router = useRouter();
 const menuOpen = ref(false);
 const hoveredIndex = ref<number | null>(null);
 const bubbleHovered = ref(false);
 
+// =========== 入场动画 ===========
+const curtainVisible = ref(true);
+const scanLineActive = ref(false);
+const starsRevealed = ref(false);
+const heroNameText = ref("");
+const heroRoleText = ref("");
+const heroSubText = ref("");
+const bubbleReady = ref(false);
+const hudVisible = ref(false);
+const hintsVisible = ref(false);
+const sidePanelsVisible = ref(false);
+
+const HERO_NAME = "杨泽宇";
+const HERO_ROLE = "FRONTEND EXPLORER";
+const HERO_SUB = "热爱前端 · 拥抱生活 · 探索无限";
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function typeWriter(
+  text: string,
+  target: Ref<string>,
+  speed = 100,
+): Promise<void> {
+  return new Promise((resolve) => {
+    let i = 0;
+    target.value = "";
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        target.value += text[i];
+        i++;
+      } else {
+        clearInterval(timer);
+        resolve();
+      }
+    }, speed);
+  });
+}
+
+async function runEntrance() {
+  await sleep(200);
+  scanLineActive.value = true;
+  await sleep(700);
+  starsRevealed.value = true;
+  curtainVisible.value = false;
+  await sleep(500);
+  await typeWriter(HERO_NAME, heroNameText, 160);
+  await sleep(200);
+  await typeWriter(HERO_ROLE, heroRoleText, 45);
+  await sleep(200);
+  await typeWriter(HERO_SUB, heroSubText, 65);
+  await sleep(400);
+  bubbleReady.value = true;
+  await sleep(300);
+  hudVisible.value = true;
+  sidePanelsVisible.value = true;
+  await sleep(400);
+  hintsVisible.value = true;
+}
+
+// =========== 轨道卫星 ===========
+const orbitAngle = ref(0);
+let orbitRAF: number | null = null;
+
+const satellites = [
+  {
+    offset: 0,
+    size: 5,
+    orbit: 108,
+    speed: 0.8,
+    color: "rgba(0, 229, 255, 0.9)",
+  },
+  {
+    offset: 140,
+    size: 3.5,
+    orbit: 122,
+    speed: 0.55,
+    color: "rgba(180, 140, 255, 0.8)",
+  },
+  {
+    offset: 250,
+    size: 4,
+    orbit: 96,
+    speed: 1.1,
+    color: "rgba(0, 255, 136, 0.8)",
+  },
+];
+
+function animateOrbit() {
+  orbitAngle.value += 0.35;
+  orbitRAF = requestAnimationFrame(animateOrbit);
+}
+
+function getSatelliteStyle(sat: (typeof satellites)[0]) {
+  const angle = ((orbitAngle.value * sat.speed + sat.offset) * Math.PI) / 180;
+  const x = Math.cos(angle) * sat.orbit;
+  const y = Math.sin(angle) * sat.orbit * 0.45; // 椭圆轨道
+  return {
+    transform: `translate(${x}px, ${y}px)`,
+    width: sat.size + "px",
+    height: sat.size + "px",
+    background: sat.color,
+    boxShadow: `0 0 ${sat.size * 3}px ${sat.color}, 0 0 ${sat.size * 6}px ${sat.color.replace(/[\d.]+\)$/, "0.3)")}`,
+  };
+}
+
+// =========== HUD 时钟 ===========
+const hudTime = ref("");
+const hudCoord = ref("");
+let hudTimer: ReturnType<typeof setInterval> | null = null;
+
+function updateHud() {
+  const now = new Date();
+  hudTime.value = now.toTimeString().split(" ")[0];
+  hudCoord.value = `${(Math.random() * 90 + 10).toFixed(4)}°N  ${(Math.random() * 180 + 10).toFixed(4)}°E`;
+}
+
 // 彩蛋
-const showMaleMermaid = ref(false);
-const showFemaleMermaid = ref(false);
 const showAlien = ref(false);
 const showUfo = ref(false);
 let eggTimer2: ReturnType<typeof setTimeout> | null = null;
@@ -19,21 +135,12 @@ let eggTimer4: ReturnType<typeof setTimeout> | null = null;
 
 function onBubbleEnter() {
   bubbleHovered.value = true;
-  if (theme.value === "ocean") {
-    eggTimer2 = setTimeout(() => {
-      showMaleMermaid.value = true;
-    }, 2000);
-    eggTimer4 = setTimeout(() => {
-      showFemaleMermaid.value = true;
-    }, 4000);
-  } else {
-    eggTimer2 = setTimeout(() => {
-      showAlien.value = true;
-    }, 2000);
-    eggTimer4 = setTimeout(() => {
-      showUfo.value = true;
-    }, 4000);
-  }
+  eggTimer2 = setTimeout(() => {
+    showAlien.value = true;
+  }, 2000);
+  eggTimer4 = setTimeout(() => {
+    showUfo.value = true;
+  }, 4000);
 }
 
 function onBubbleLeave() {
@@ -46,17 +153,8 @@ function onBubbleLeave() {
     clearTimeout(eggTimer4);
     eggTimer4 = null;
   }
-  showMaleMermaid.value = false;
-  showFemaleMermaid.value = false;
   showAlien.value = false;
   showUfo.value = false;
-}
-
-// 主题切换
-type Theme = "ocean" | "galaxy";
-const theme = ref<Theme>("ocean");
-function toggleTheme() {
-  theme.value = theme.value === "ocean" ? "galaxy" : "ocean";
 }
 
 const pages = [
@@ -69,25 +167,7 @@ function randBetween(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
-// 随机气泡（海洋模式）
-interface Bubble {
-  id: number;
-  x: number;
-  size: number;
-  duration: number;
-  delay: number;
-  opacity: number;
-}
-const bubbles: Bubble[] = Array.from({ length: 28 }, (_, i) => ({
-  id: i,
-  x: randBetween(2, 98),
-  size: randBetween(4, 22),
-  duration: randBetween(7, 20),
-  delay: randBetween(0, 15),
-  opacity: randBetween(0.05, 0.22),
-}));
-
-// 随机浮星（星河模式）
+// 随机浮星
 interface StarParticle {
   id: number;
   x: number; // left %
@@ -253,10 +333,16 @@ function onClickOutside(e: MouseEvent) {
 
 onMounted(() => {
   document.addEventListener("click", onClickOutside);
+  runEntrance();
+  animateOrbit();
+  updateHud();
+  hudTimer = setInterval(updateHud, 1000);
 });
 
 onUnmounted(() => {
   document.removeEventListener("click", onClickOutside);
+  if (orbitRAF) cancelAnimationFrame(orbitRAF);
+  if (hudTimer) clearInterval(hudTimer);
 });
 
 function goToPage(id: number) {
@@ -265,47 +351,26 @@ function goToPage(id: number) {
 </script>
 
 <template>
-  <div class="home" :class="theme">
-    <!-- 主题切换按钮 -->
-    <button class="theme-toggle" @click="toggleTheme" :class="theme">
-      <span class="toggle-icon">{{ theme === "ocean" ? "🌊" : "🌌" }}</span>
-      <span class="toggle-label">{{
-        theme === "ocean" ? "海洋" : "星河"
-      }}</span>
-      <span class="toggle-arrow">⇄</span>
-    </button>
+  <div class="home galaxy">
+    <!-- 电影式暗幕 -->
+    <Transition name="curtain">
+      <div v-if="curtainVisible" class="curtain">
+        <div v-if="scanLineActive" class="scan-line" />
+        <span class="curtain-init">SYSTEM INITIALIZING...</span>
+      </div>
+    </Transition>
 
     <!-- 背景星点 -->
-    <div class="stars" />
+    <div class="stars" :class="{ 'stars--visible': starsRevealed }" />
 
-    <!-- 海洋模式：浮动气泡 + 海底光晕 -->
-    <template v-if="theme === 'ocean'">
-      <div class="bubbles-layer" aria-hidden="true">
-        <div
-          v-for="b in bubbles"
-          :key="b.id"
-          class="float-bubble"
-          :style="{
-            left: b.x + '%',
-            width: b.size + 'px',
-            height: b.size + 'px',
-            opacity: b.opacity,
-            animationDuration: b.duration + 's',
-            animationDelay: b.delay + 's',
-          }"
-        />
-      </div>
-      <div class="ocean-glow" />
-    </template>
+    <!-- 漫画集中线 -->
+    <GalaxySpeedLines :active="bubbleHovered && !menuOpen" />
 
-    <!-- 银河模式：漫画集中线 -->
-    <GalaxySpeedLines
-      v-if="theme === 'galaxy'"
-      :active="bubbleHovered && !menuOpen"
-    />
+    <!-- 鼠标星尘粒子 -->
+    <MouseParticles />
 
-    <!-- 星河模式：浮星 + 星云带 -->
-    <template v-if="theme === 'galaxy'">
+    <!-- 浮星 + 星云带 -->
+    <template>
       <div class="galaxy-layer" aria-hidden="true">
         <!-- 星云带 -->
         <div class="nebula-band band-1" />
@@ -327,7 +392,174 @@ function goToPage(id: number) {
       </div>
     </template>
 
-    <div class="scene">
+    <!-- HUD 装饰元素 -->
+    <div class="hud-layer" :class="{ 'hud--visible': hudVisible }">
+      <div class="hud-corner hud-tl">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <path
+            d="M2 16 L2 2 L16 2"
+            fill="none"
+            stroke="rgba(0,229,255,0.5)"
+            stroke-width="1.5"
+          />
+        </svg>
+      </div>
+      <div class="hud-corner hud-tr">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <path
+            d="M32 2 L46 2 L46 16"
+            fill="none"
+            stroke="rgba(0,229,255,0.5)"
+            stroke-width="1.5"
+          />
+        </svg>
+      </div>
+      <div class="hud-corner hud-bl">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <path
+            d="M2 32 L2 46 L16 46"
+            fill="none"
+            stroke="rgba(0,229,255,0.5)"
+            stroke-width="1.5"
+          />
+        </svg>
+      </div>
+      <div class="hud-corner hud-br">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <path
+            d="M32 46 L46 46 L46 32"
+            fill="none"
+            stroke="rgba(0,229,255,0.5)"
+            stroke-width="1.5"
+          />
+        </svg>
+      </div>
+      <div class="hud-data hud-data-left">
+        <span class="hud-label">SYS.TIME</span>
+        <span class="hud-value">{{ hudTime }}</span>
+      </div>
+      <div class="hud-data hud-data-right">
+        <span class="hud-label">COORD</span>
+        <span class="hud-value">{{ hudCoord }}</span>
+      </div>
+      <div class="hud-line hud-line-top" />
+      <div class="hud-line hud-line-bottom" />
+    </div>
+
+    <!-- ===== 左侧面板：数据流（3D透视） ===== -->
+    <div
+      class="side-panel side-left"
+      :class="{ 'side--visible': sidePanelsVisible, 'side--hide': menuOpen }"
+    >
+      <div class="panel-3d panel-3d-left">
+        <div class="panel-glass">
+          <div class="panel-header">
+            <span class="panel-title">// SYSTEM STATUS</span>
+            <span class="panel-indicator" />
+          </div>
+          <div class="data-stream">
+            <div
+              class="stream-line"
+              v-for="n in 8"
+              :key="'sl' + n"
+              :style="{ animationDelay: n * 0.4 + 's' }"
+            >
+              <span class="stream-dot" />
+              <span class="stream-text">{{
+                [
+                  "SYS.READY",
+                  "VUE 3.5",
+                  "TS STRICT",
+                  "VITE HMR",
+                  "PINIA ✓",
+                  "ROUTER ✓",
+                  "SSR.OFF",
+                  "GPU.ACCEL",
+                ][n - 1]
+              }}</span>
+            </div>
+          </div>
+          <div class="panel-edge panel-edge-left" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 右侧面板：技术栈（3D透视） ===== -->
+    <div
+      class="side-panel side-right"
+      :class="{ 'side--visible': sidePanelsVisible, 'side--hide': menuOpen }"
+    >
+      <div class="panel-3d panel-3d-right">
+        <div class="panel-glass panel-glass--purple">
+          <div class="panel-header panel-header--right">
+            <span class="panel-indicator panel-indicator--purple" />
+            <span class="panel-title panel-title--purple">TECH STACK //</span>
+          </div>
+          <div class="tech-stack">
+            <div
+              class="tech-item"
+              v-for="(tech, i) in [
+                'Vue',
+                'TypeScript',
+                'Three.js',
+                'CSS Art',
+                'Node.js',
+              ]"
+              :key="tech"
+              :style="{ animationDelay: i * 0.4 + 0.3 + 's' }"
+            >
+              <span class="tech-name">{{ tech }}</span>
+              <span class="tech-bar">
+                <span
+                  class="tech-bar-fill"
+                  :style="{
+                    width: [92, 88, 70, 85, 75][i] + '%',
+                    animationDelay: i * 0.4 + 1 + 's',
+                  }"
+                />
+              </span>
+              <span class="tech-pct">{{ [92, 88, 70, 85, 75][i] }}%</span>
+            </div>
+          </div>
+          <div class="panel-edge panel-edge-right" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero 文字区域（3D 层叠） -->
+    <div class="hero-section" :class="{ 'hero--hidden': menuOpen }">
+      <div class="hero-3d-wrap">
+        <h1 class="hero-name" v-show="heroNameText">
+          {{ heroNameText }}
+        </h1>
+        <!-- 3D 投影副本 -->
+        <h1
+          class="hero-name hero-name-shadow"
+          v-show="heroNameText"
+          aria-hidden="true"
+        >
+          {{ heroNameText }}
+        </h1>
+      </div>
+      <p class="hero-role" v-show="heroRoleText">
+        &lt; {{ heroRoleText }} /&gt;
+      </p>
+      <p class="hero-sub" v-show="heroSubText">
+        {{ heroSubText }}
+      </p>
+    </div>
+
+    <div class="scene" :class="{ 'scene--ready': bubbleReady }">
+      <!-- 轨道卫星 -->
+      <div class="orbit-ring" v-show="bubbleReady && !menuOpen">
+        <div
+          v-for="(sat, idx) in satellites"
+          :key="'sat-' + idx"
+          class="satellite"
+          :style="getSatelliteStyle(sat)"
+        />
+      </div>
+
       <!-- 扇形菜单 SVG -->
       <Transition name="menu">
         <svg
@@ -411,36 +643,28 @@ function goToPage(id: number) {
         </svg>
       </Transition>
 
-      <!-- 海洋模式：粒子光芒 -->
-      <OceanParticleBurst
-        v-if="theme === 'ocean'"
-        :active="bubbleHovered && !menuOpen"
-      />
-
       <!-- 中心透明泡泡 -->
       <div
         class="bubble"
-        :class="{ 'bubble--open': menuOpen }"
+        :class="{ 'bubble--open': menuOpen, 'bubble--cyber': !menuOpen }"
         @click="openMenu"
         @mouseenter="onBubbleEnter"
         @mouseleave="onBubbleLeave"
       >
         <div class="bubble-shine" />
-        <span class="bubble-text">{{ menuOpen ? "" : "START" }}</span>
+        <div class="bubble-hex-ring" v-show="!menuOpen" />
+        <span class="bubble-text">{{ menuOpen ? "" : "EXPLORE" }}</span>
       </div>
-    </div>
 
-    <!-- 海洋彩蛋：美人鱼 -->
-    <Transition name="mermaid-rise">
-      <div v-if="showMaleMermaid" class="mermaid-male">
-        <span>🧜‍♂️</span>
-      </div>
-    </Transition>
-    <Transition name="mermaid-right">
-      <div v-if="showFemaleMermaid" class="mermaid-female">
-        <span>🧜‍♀️</span>
-      </div>
-    </Transition>
+      <!-- 菜单预览提示 -->
+      <Transition name="hints">
+        <div v-if="hintsVisible && !menuOpen" class="menu-hints">
+          <span class="hint-item" v-for="p in pages" :key="p.id">
+            {{ p.label }}
+          </span>
+        </div>
+      </Transition>
+    </div>
 
     <!-- 星河彩蛋：外星人 & 飞碑 -->
     <Transition name="alien-in">
@@ -464,144 +688,26 @@ function goToPage(id: number) {
   position: relative;
   background: linear-gradient(
     180deg,
-    #021a30 0%,
-    #063a5c 15%,
-    #0b5a8a 32%,
-    #1278a8 48%,
-    #1a92c2 62%,
-    #22a8d8 76%,
-    #2bbce8 88%,
-    #38caf0 100%
+    #000005 0%,
+    #010210 18%,
+    #030618 38%,
+    #050a22 55%,
+    #030618 72%,
+    #010210 88%,
+    #000005 100%
   );
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: background 1.2s ease;
 }
 
-/* 星河模式背景 */
-.home.galaxy {
-  background: linear-gradient(
-    180deg,
-    #000003 0%,
-    #04000e 18%,
-    #080018 38%,
-    #0a0020 55%,
-    #060015 72%,
-    #030010 88%,
-    #000008 100%
-  );
-}
-
-/* 主题切换按钮 */
-.theme-toggle {
-  position: fixed;
-  top: 24px;
-  right: 28px;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  box-shadow:
-    0 2px 16px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  transition:
-    background 0.3s,
-    border-color 0.3s,
-    box-shadow 0.3s,
-    transform 0.2s;
-  user-select: none;
-}
-.theme-toggle:hover {
-  background: rgba(255, 255, 255, 0.13);
-  border-color: rgba(255, 255, 255, 0.38);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-}
-.theme-toggle:active {
-  transform: translateY(0) scale(0.97);
-}
-.theme-toggle.galaxy {
-  border-color: rgba(180, 140, 255, 0.35);
-  box-shadow:
-    0 2px 16px rgba(120, 60, 255, 0.2),
-    inset 0 1px 0 rgba(200, 170, 255, 0.12);
-}
-.toggle-icon {
-  font-size: 15px;
-}
-.toggle-label {
-  font-size: 13px;
-}
-.toggle-arrow {
-  font-size: 14px;
-  opacity: 0.55;
-  margin-left: 2px;
-}
-
-/* 浮动气泡层 */
-.bubbles-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.float-bubble {
-  position: absolute;
-  bottom: -40px;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at 35% 30%,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(180, 220, 255, 0.2) 45%,
-    transparent 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.15);
-  animation: bubble-rise linear infinite;
-  will-change: transform, opacity;
-}
-
-@keyframes bubble-rise {
-  0% {
-    transform: translateY(0) translateX(0) scale(1);
-    opacity: var(--base-opacity, 0.12);
-  }
-  20% {
-    transform: translateY(-20vh) translateX(12px) scale(1.02);
-  }
-  50% {
-    transform: translateY(-50vh) translateX(-10px) scale(0.98);
-  }
-  80% {
-    transform: translateY(-80vh) translateX(8px) scale(1.01);
-    opacity: var(--base-opacity, 0.12);
-  }
-  100% {
-    transform: translateY(-105vh) translateX(-5px) scale(0.95);
-    opacity: 0;
-  }
-}
-
-/* 星点背景（两种模式均保留少量星点） */
+/* 星点背景 */
 .stars {
   position: absolute;
   inset: 0;
-  transition: opacity 1s ease;
+  opacity: 0;
+  transition: opacity 1.2s ease;
   background-image:
     radial-gradient(
       1px 1px at 15% 12%,
@@ -665,22 +771,8 @@ function goToPage(id: number) {
     );
   pointer-events: none;
 }
-
-/* 海底光晕 */
-.ocean-glow {
-  position: absolute;
-  bottom: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 900px;
-  height: 350px;
-  background: radial-gradient(
-    ellipse,
-    rgba(30, 140, 200, 0.2) 0%,
-    transparent 70%
-  );
-  pointer-events: none;
-  filter: blur(20px);
+.stars--visible {
+  opacity: 1;
 }
 
 .scene {
@@ -690,108 +782,15 @@ function goToPage(id: number) {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* ========================
-   美人鱼彩蛋
-======================== */
-
-/* 男美人鱼：超大，底部冒出，下半截藏在屏幕底边外，位于左侧 */
-.mermaid-male {
-  position: absolute;
-  left: 60px;
-  bottom: -100px; /* 下半截（约200px）藏在底边外 */
-  pointer-events: none;
-  z-index: 50;
-  animation: mermaid-bob-bottom 3.2s ease-in-out infinite;
-}
-.mermaid-male span {
-  font-size: 380px;
-  line-height: 1;
-  display: block;
-  filter: drop-shadow(0 0 40px rgba(60, 180, 255, 0.75))
-    drop-shadow(0 0 80px rgba(30, 120, 255, 0.4));
-}
-
-/* 女美人鱼：较大，整体显示在右侧 */
-.mermaid-female {
-  position: absolute;
-  right: 24px;
-  top: 50%;
-  margin-top: -90px; /* 垂直居中偏移 */
-  pointer-events: none;
-  z-index: 50;
-  animation: mermaid-bob 3s ease-in-out infinite;
-  animation-delay: 0.5s;
-}
-.mermaid-female span {
-  font-size: 180px;
-  line-height: 1;
-  display: block;
-  filter: drop-shadow(0 0 24px rgba(200, 120, 255, 0.7))
-    drop-shadow(0 0 50px rgba(160, 80, 255, 0.35));
-}
-
-/* Male bob：在底部上下浮动（负Y = 向上冒） */
-@keyframes mermaid-bob-bottom {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-28px);
-  }
-}
-
-/* Female bob */
-@keyframes mermaid-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-22px);
-  }
-}
-
-/* 男鱼：从底部冒出 */
-.mermaid-rise-enter-active {
-  transition:
-    opacity 0.5s ease,
-    transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1);
-}
-.mermaid-rise-leave-active {
-  transition:
-    opacity 0.35s ease-in,
-    transform 0.35s ease-in;
-}
-.mermaid-rise-enter-from {
   opacity: 0;
-  transform: translateY(120px);
-}
-.mermaid-rise-leave-to {
-  opacity: 0;
-  transform: translateY(100px);
-}
-
-/* 女鱼：从右侧滑入 */
-.mermaid-right-enter-active {
+  transform: scale(0.8);
   transition:
-    opacity 0.5s ease,
-    transform 0.65s cubic-bezier(0.34, 1.4, 0.64, 1);
+    opacity 0.8s ease,
+    transform 0.8s cubic-bezier(0.34, 1.3, 0.64, 1);
 }
-.mermaid-right-leave-active {
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease-in;
-}
-.mermaid-right-enter-from {
-  opacity: 0;
-  transform: translateX(80px);
-}
-.mermaid-right-leave-to {
-  opacity: 0;
-  transform: translateX(60px);
+.scene--ready {
+  opacity: 1;
+  transform: scale(1);
 }
 
 /* ========================
@@ -1145,16 +1144,16 @@ function goToPage(id: number) {
   cursor: pointer;
   background: radial-gradient(
     ellipse at 38% 35%,
-    rgba(255, 255, 255, 0.22) 0%,
-    rgba(160, 215, 255, 0.1) 40%,
-    rgba(80, 170, 255, 0.04) 70%,
+    rgba(0, 229, 255, 0.12) 0%,
+    rgba(80, 170, 255, 0.06) 40%,
+    rgba(40, 100, 200, 0.03) 70%,
     transparent 100%
   );
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(0, 229, 255, 0.25);
   box-shadow:
-    inset 0 0 24px rgba(255, 255, 255, 0.06),
-    0 0 40px rgba(60, 160, 255, 0.2),
-    0 0 80px rgba(40, 130, 240, 0.1);
+    inset 0 0 24px rgba(0, 229, 255, 0.06),
+    0 0 40px rgba(0, 200, 255, 0.2),
+    0 0 80px rgba(0, 150, 255, 0.08);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   transition:
@@ -1163,22 +1162,44 @@ function goToPage(id: number) {
     border-color 0.4s ease;
 }
 
+.bubble--cyber {
+  animation: bubble-pulse 3s ease-in-out infinite;
+}
+
+@keyframes bubble-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 24px rgba(0, 229, 255, 0.06),
+      0 0 40px rgba(0, 200, 255, 0.2),
+      0 0 80px rgba(0, 150, 255, 0.08);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 30px rgba(0, 229, 255, 0.1),
+      0 0 60px rgba(0, 229, 255, 0.3),
+      0 0 120px rgba(0, 180, 255, 0.15),
+      0 0 200px rgba(0, 150, 255, 0.05);
+  }
+}
+
 .bubble:hover:not(.bubble--open) {
   transform: scale(1.08);
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(0, 229, 255, 0.6);
   box-shadow:
-    inset 0 0 30px rgba(255, 255, 255, 0.08),
-    0 0 60px rgba(80, 180, 255, 0.35),
-    0 0 120px rgba(50, 150, 255, 0.15);
+    inset 0 0 30px rgba(0, 229, 255, 0.1),
+    0 0 60px rgba(0, 229, 255, 0.4),
+    0 0 120px rgba(0, 200, 255, 0.2);
 }
 
 .bubble--open {
   cursor: default;
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(0, 229, 255, 0.15);
   box-shadow:
-    inset 0 0 30px rgba(255, 255, 255, 0.05),
-    0 0 50px rgba(40, 140, 240, 0.25),
-    0 0 100px rgba(30, 120, 220, 0.1);
+    inset 0 0 30px rgba(0, 229, 255, 0.05),
+    0 0 50px rgba(0, 200, 255, 0.2),
+    0 0 100px rgba(0, 150, 255, 0.08);
+  animation: none;
 }
 
 /* 泡泡高光 */
@@ -1200,15 +1221,648 @@ function goToPage(id: number) {
 }
 
 .bubble-text {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 0.18em;
+  color: rgba(0, 229, 255, 0.95);
+  letter-spacing: 0.22em;
+  font-family: "Courier New", "SF Mono", monospace;
   text-shadow:
-    0 0 16px rgba(160, 220, 255, 0.7),
+    0 0 16px rgba(0, 229, 255, 0.7),
+    0 0 40px rgba(0, 200, 255, 0.3),
     0 1px 4px rgba(0, 0, 0, 0.2);
   user-select: none;
   position: relative;
   z-index: 1;
+}
+
+/* ========================
+   电影式暗幕 + 扫描线
+======================== */
+.curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: #000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 24px 32px;
+}
+.curtain-enter-active,
+.curtain-leave-active {
+  transition: opacity 1s ease;
+}
+.curtain-leave-to {
+  opacity: 0;
+}
+.curtain-init {
+  font-family: "Courier New", "SF Mono", monospace;
+  font-size: 13px;
+  color: rgba(0, 229, 255, 0.5);
+  letter-spacing: 2px;
+  animation: init-blink 1s step-end infinite;
+}
+@keyframes init-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 229, 255, 0.15) 20%,
+    rgba(0, 229, 255, 0.6) 50%,
+    rgba(0, 229, 255, 0.15) 80%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 20px rgba(0, 229, 255, 0.4),
+    0 0 60px rgba(0, 229, 255, 0.15);
+  animation: scan-sweep 0.8s ease-in-out forwards;
+}
+@keyframes scan-sweep {
+  from {
+    top: 0;
+  }
+  to {
+    top: 100%;
+  }
+}
+
+/* ========================
+   HUD 装饰层
+======================== */
+.hud-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.hud--visible {
+  opacity: 1;
+}
+
+.hud-corner {
+  position: absolute;
+}
+.hud-tl {
+  top: 16px;
+  left: 16px;
+}
+.hud-tr {
+  top: 16px;
+  right: 16px;
+}
+.hud-bl {
+  bottom: 16px;
+  left: 16px;
+}
+.hud-br {
+  bottom: 16px;
+  right: 16px;
+}
+
+.hud-data {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: "Courier New", "SF Mono", monospace;
+}
+.hud-data-left {
+  bottom: 40px;
+  left: 28px;
+}
+.hud-data-right {
+  bottom: 40px;
+  right: 28px;
+  text-align: right;
+  align-items: flex-end;
+}
+.hud-label {
+  font-size: 10px;
+  color: rgba(0, 229, 255, 0.4);
+  letter-spacing: 2px;
+}
+.hud-value {
+  font-size: 13px;
+  color: rgba(0, 229, 255, 0.65);
+  letter-spacing: 1px;
+}
+
+.hud-line {
+  position: absolute;
+  left: 5%;
+  width: 90%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 229, 255, 0.1) 15%,
+    rgba(0, 229, 255, 0.15) 50%,
+    rgba(0, 229, 255, 0.1) 85%,
+    transparent 100%
+  );
+}
+.hud-line-top {
+  top: 60px;
+}
+.hud-line-bottom {
+  bottom: 60px;
+}
+
+/* ========================
+   Hero 文字区域（3D 层叠）
+======================== */
+.hero-section {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+  perspective: 600px;
+}
+.hero--hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-16px);
+}
+
+.hero-3d-wrap {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.hero-name {
+  font-size: 4.2rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.18em;
+  margin: 0;
+  line-height: 1.2;
+  text-shadow:
+    0 0 40px rgba(0, 229, 255, 0.4),
+    0 0 100px rgba(0, 200, 255, 0.15),
+    0 2px 0 rgba(0, 180, 255, 0.15),
+    0 4px 0 rgba(0, 160, 255, 0.08);
+  position: relative;
+  z-index: 2;
+}
+
+/* 3D 倒影：透视压缩 + 渐变消失 */
+.hero-name-shadow {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-image: linear-gradient(
+    180deg,
+    rgba(0, 229, 255, 0.25) 0%,
+    transparent 70%
+  );
+  transform: rotateX(68deg) scaleY(0.5);
+  transform-origin: top center;
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+  text-shadow: none;
+}
+
+.hero-role {
+  font-family: "Courier New", "SF Mono", monospace;
+  font-size: 1.15rem;
+  color: rgba(0, 229, 255, 0.75);
+  letter-spacing: 0.28em;
+  margin: 6px 0 0;
+  text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+}
+
+.hero-sub {
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.15em;
+  margin: 10px 0 0;
+  font-weight: 300;
+}
+
+/* ========================
+   轨道卫星
+======================== */
+.orbit-ring {
+  position: absolute;
+  width: 0;
+  height: 0;
+  top: 50%;
+  left: 50%;
+  z-index: 9;
+  pointer-events: none;
+}
+.satellite {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+  transition: opacity 0.3s ease;
+}
+
+/* ========================
+   泡泡六边形环
+======================== */
+.bubble-hex-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 229, 255, 0.15);
+  animation: hex-spin 20s linear infinite;
+  pointer-events: none;
+}
+@keyframes hex-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================
+   菜单预览提示
+======================== */
+.menu-hints {
+  position: absolute;
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  z-index: 10;
+  white-space: nowrap;
+}
+.hint-item {
+  font-family: "Courier New", "SF Mono", monospace;
+  font-size: 13px;
+  color: rgba(0, 229, 255, 0.45);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  position: relative;
+  padding: 0 6px;
+}
+.hint-item::before {
+  content: "//";
+  margin-right: 4px;
+  opacity: 0.4;
+}
+
+.hints-enter-active {
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+.hints-leave-active {
+  transition: opacity 0.3s ease;
+}
+.hints-enter-from {
+  opacity: 0;
+  transform: translateX(-50%) translateY(10px);
+}
+.hints-leave-to {
+  opacity: 0;
+}
+
+/* ========================
+   3D 侧面板系统
+======================== */
+.side-panel {
+  position: absolute;
+  top: 50%;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  opacity: 0;
+  transition:
+    opacity 1s ease,
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  perspective: 1000px;
+}
+.side-left {
+  left: 28px;
+  transform: translateY(-50%) translateX(-60px);
+}
+.side-right {
+  right: 28px;
+  align-items: flex-end;
+  transform: translateY(-50%) translateX(60px);
+}
+.side--visible {
+  opacity: 1;
+}
+.side--visible.side-left {
+  transform: translateY(-50%) translateX(0);
+}
+.side--visible.side-right {
+  transform: translateY(-50%) translateX(0);
+}
+.side--hide {
+  opacity: 0 !important;
+  transition: opacity 0.4s ease !important;
+}
+
+/* 3D 透视容器 */
+.panel-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.panel-3d-left {
+  transform: rotateY(12deg) rotateX(-2deg);
+}
+.panel-3d-right {
+  transform: rotateY(-12deg) rotateX(-2deg);
+}
+.side--visible .panel-3d-left {
+  animation: panel-float-left 8s ease-in-out infinite;
+}
+.side--visible .panel-3d-right {
+  animation: panel-float-right 8s ease-in-out infinite;
+}
+
+@keyframes panel-float-left {
+  0%,
+  100% {
+    transform: rotateY(12deg) rotateX(-2deg) translateZ(0);
+  }
+  50% {
+    transform: rotateY(14deg) rotateX(-1deg) translateZ(8px);
+  }
+}
+@keyframes panel-float-right {
+  0%,
+  100% {
+    transform: rotateY(-12deg) rotateX(-2deg) translateZ(0);
+  }
+  50% {
+    transform: rotateY(-14deg) rotateX(-1deg) translateZ(8px);
+  }
+}
+
+/* 毛玻璃面板 */
+.panel-glass {
+  position: relative;
+  padding: 20px 24px;
+  min-width: 180px;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 229, 255, 0.06) 0%,
+    rgba(0, 150, 255, 0.03) 50%,
+    rgba(0, 100, 200, 0.02) 100%
+  );
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  border-radius: 6px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(0, 229, 255, 0.1);
+  overflow: hidden;
+}
+.panel-glass--purple {
+  background: linear-gradient(
+    135deg,
+    rgba(180, 140, 255, 0.06) 0%,
+    rgba(140, 100, 255, 0.03) 50%,
+    rgba(100, 80, 200, 0.02) 100%
+  );
+  border-color: rgba(180, 140, 255, 0.15);
+  box-shadow:
+    0 0 30px rgba(180, 140, 255, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(180, 140, 255, 0.1);
+}
+
+/* 面板发光边 */
+.panel-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
+.panel-edge-left {
+  left: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 5%,
+    rgba(0, 229, 255, 0.4) 30%,
+    rgba(0, 229, 255, 0.15) 50%,
+    rgba(0, 229, 255, 0.4) 70%,
+    transparent 95%
+  );
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+.panel-edge-right {
+  right: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 5%,
+    rgba(180, 140, 255, 0.4) 30%,
+    rgba(180, 140, 255, 0.15) 50%,
+    rgba(180, 140, 255, 0.4) 70%,
+    transparent 95%
+  );
+  box-shadow: 0 0 8px rgba(180, 140, 255, 0.3);
+}
+
+/* 面板标题栏 */
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+}
+.panel-header--right {
+  justify-content: flex-end;
+  border-bottom-color: rgba(180, 140, 255, 0.1);
+}
+.panel-title {
+  font-family: "Courier New", "SF Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(0, 229, 255, 0.6);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.panel-title--purple {
+  color: rgba(180, 140, 255, 0.6);
+}
+.panel-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(0, 229, 255, 0.8);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+  animation: indicator-pulse 2s ease-in-out infinite;
+}
+.panel-indicator--purple {
+  background: rgba(180, 140, 255, 0.8);
+  box-shadow: 0 0 8px rgba(180, 140, 255, 0.6);
+}
+@keyframes indicator-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* --- 左侧数据流 --- */
+.data-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stream-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: stream-fade-in 0.5s ease forwards;
+}
+.stream-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(0, 229, 255, 0.8);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+  flex-shrink: 0;
+  animation: dot-pulse 2.5s ease-in-out infinite;
+}
+.stream-text {
+  font-family: "Courier New", "SF Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  color: rgba(0, 229, 255, 0.55);
+  white-space: nowrap;
+}
+
+@keyframes stream-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px) translateZ(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateZ(0);
+  }
+}
+@keyframes dot-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* --- 右侧技术栈 --- */
+.tech-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tech-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: tech-fade-in 0.5s ease forwards;
+}
+.tech-name {
+  font-family: "Courier New", "SF Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: rgba(180, 140, 255, 0.65);
+  white-space: nowrap;
+  min-width: 72px;
+}
+.tech-bar {
+  width: 90px;
+  height: 4px;
+  background: rgba(180, 140, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.tech-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(180, 140, 255, 0.2) 0%,
+    rgba(180, 140, 255, 0.7) 100%
+  );
+  box-shadow: 0 0 8px rgba(180, 140, 255, 0.4);
+  animation: bar-grow 1s ease forwards;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.tech-pct {
+  font-family: "Courier New", "SF Mono", monospace;
+  font-size: 11px;
+  color: rgba(180, 140, 255, 0.4);
+  min-width: 28px;
+  text-align: right;
+}
+
+@keyframes tech-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px) translateZ(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateZ(0);
+  }
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 </style>
