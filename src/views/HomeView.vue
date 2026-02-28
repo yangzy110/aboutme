@@ -201,75 +201,6 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- 第二页 -->
-      <div class="page page-2">
-        <div class="company-section">
-          <div class="company-title-wrapper">
-            <h1 class="company-title">职业之旅</h1>
-            <p class="company-subtitle">我在公司的成长历程</p>
-          </div>
-
-          <div class="timeline-container">
-            <!-- 时间线项目1：加入大家庭 -->
-            <div class="timeline-item" data-index="0">
-              <div class="timeline-card">
-                <div class="card-image">
-                  <img src="@/assets/cpn/1.png" alt="加入大家庭" />
-                </div>
-                <div class="card-content">
-                  <h3 class="card-title">加入大家庭</h3>
-                  <p class="card-desc">踏入新征程，成为团队的一员</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- 时间线项目2：从观众到演员的"蜕变" -->
-            <div class="timeline-item" data-index="1">
-              <div class="timeline-card timeline-card-double">
-                <div class="card-images-row">
-                  <div class="card-image">
-                    <img src="@/assets/cpn/2.png" alt="观众视角" />
-                  </div>
-                  <div class="card-image">
-                    <img src="@/assets/cpn/3.png" alt="演员视角" />
-                  </div>
-                </div>
-                <div class="card-content">
-                  <h3 class="card-title">从观众到演员的"蜕变"</h3>
-                  <p class="card-desc">不断学习，从旁观者到参与者</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- 时间线项目3：加班餐很丰盛 -->
-            <div class="timeline-item" data-index="2">
-              <div class="timeline-card">
-                <div class="card-image">
-                  <img src="@/assets/cpn/4.png" alt="加班餐很丰盛" />
-                </div>
-                <div class="card-content">
-                  <h3 class="card-title">加班餐很丰盛</h3>
-                  <p class="card-desc">福利满满，温暖人心</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- 时间线项目4：小有成就 -->
-            <div class="timeline-item" data-index="3">
-              <div class="timeline-card">
-                <div class="card-image">
-                  <img src="@/assets/cpn/5.png" alt="小有成就" />
-                </div>
-                <div class="card-content">
-                  <h3 class="card-title">小有成就</h3>
-                  <p class="card-desc">收获成长，见证进步</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- 第三页 -->
       <div class="page page-3">
         <div class="life-section">
@@ -347,25 +278,8 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <!-- 5. 贵阳白宫 -->
-            <div class="gallery-item item-wide" data-index="4">
-              <div class="gallery-card">
-                <div class="gallery-image">
-                  <img src="@/assets/lf/5.png" alt="贵阳白宫" />
-                  <div class="image-overlay">
-                    <div class="overlay-content">
-                      <h3 class="place-name">贵阳白宫</h3>
-                      <p class="place-poem">
-                        林城筑梦白宫前<br />云贵高原试比天
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 6. 四姑娘山 -->
-            <div class="gallery-item item-large" data-index="5">
+            <!-- 5. 四姑娘山 -->
+            <div class="gallery-item" data-index="4">
               <div class="gallery-card">
                 <div class="gallery-image">
                   <img src="@/assets/lf/6.png" alt="四姑娘山" />
@@ -377,6 +291,75 @@ onUnmounted(() => {
                       </p>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第二页 -->
+      <div class="page page-2">
+        <div class="company-section">
+          <div class="company-title-wrapper">
+            <h1 class="company-title">职业之旅</h1>
+            <p class="company-subtitle">我在公司的成长历程</p>
+          </div>
+
+          <div class="timeline-container">
+            <!-- 时间线项目1：加入大家庭 -->
+            <div class="timeline-item" data-index="0">
+              <div class="timeline-card">
+                <div class="card-image">
+                  <img src="@/assets/cpn/1.png" alt="加入大家庭" />
+                </div>
+                <div class="card-content">
+                  <h3 class="card-title">加入大家庭</h3>
+                  <p class="card-desc">踏入新征程，成为团队的一员</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 时间线项目2：从观众到演员的"蜕变" -->
+            <div class="timeline-item" data-index="1">
+              <div class="timeline-card timeline-card-double">
+                <div class="card-images-row">
+                  <div class="card-image">
+                    <img src="@/assets/cpn/2.png" alt="观众视角" />
+                  </div>
+                  <div class="card-image">
+                    <img src="@/assets/cpn/3.png" alt="演员视角" />
+                  </div>
+                </div>
+                <div class="card-content">
+                  <h3 class="card-title">从观众到演员的"蜕变"</h3>
+                  <p class="card-desc">不断学习，从旁观者到参与者</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 时间线项目3：加班餐很丰盛 -->
+            <div class="timeline-item" data-index="2">
+              <div class="timeline-card">
+                <div class="card-image">
+                  <img src="@/assets/cpn/4.png" alt="加班餐很丰盛" />
+                </div>
+                <div class="card-content">
+                  <h3 class="card-title">加班餐很丰盛</h3>
+                  <p class="card-desc">福利满满，温暖人心</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 时间线项目4：小有成就 -->
+            <div class="timeline-item" data-index="3">
+              <div class="timeline-card">
+                <div class="card-image">
+                  <img src="@/assets/cpn/5.png" alt="小有成就" />
+                </div>
+                <div class="card-content">
+                  <h3 class="card-title">小有成就</h3>
+                  <p class="card-desc">收获成长，见证进步</p>
                 </div>
               </div>
             </div>
