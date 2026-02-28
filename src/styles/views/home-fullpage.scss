@@ -40,52 +40,14 @@
   }
 }
 
-/* 第二页 - 绿色背景 */
+/* 第二页 - 公司相关，样式在 home-company.scss */
 .page-2 {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  .page-content {
-    text-align: center;
-    color: white;
-    
-    h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-      font-weight: 600;
-    }
-    
-    p {
-      font-size: 24px;
-      opacity: 0.9;
-    }
-  }
+  // 样式在 home-company.scss 中定义
 }
 
-/* 第三页 - 黄色背景 */
+/* 第三页 - 生活美食，样式在 home-life.scss */
 .page-3 {
-  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  .page-content {
-    text-align: center;
-    color: white;
-    
-    h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-      font-weight: 600;
-    }
-    
-    p {
-      font-size: 24px;
-      opacity: 0.9;
-    }
-  }
+  // 样式在 home-life.scss 中定义
 }
 
 /* 页面指示器 */
