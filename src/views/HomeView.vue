@@ -3,33 +3,31 @@
  * HomeView - 首页视图
  * 功能：入场动画、星空背景、弧形菜单、HUD装饰
  */
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
-import GalaxySpeedLines from '@/components/GalaxySpeedLines.vue'
-import MouseParticles from '@/components/MouseParticles.vue'
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+import GalaxySpeedLines from "@/components/GalaxySpeedLines.vue";
+import MouseParticles from "@/components/MouseParticles.vue";
 
 // Composables
-import { useEntrance } from '@/composables/useEntrance'
-import { useOrbitSatellites } from '@/composables/useOrbitSatellites'
-import { useHudClock } from '@/composables/useHudClock'
-import { useGalaxyEasterEgg } from '@/composables/useGalaxyEasterEgg'
-import { useArcMenuGeometry } from '@/composables/useArcMenuGeometry'
-import { useStarParticles } from '@/composables/useStarParticles'
+import { useEntrance } from "@/composables/useEntrance";
+import { useOrbitSatellites } from "@/composables/useOrbitSatellites";
+import { useHudClock } from "@/composables/useHudClock";
+import { useGalaxyEasterEgg } from "@/composables/useGalaxyEasterEgg";
+import { useStarParticles } from "@/composables/useStarParticles";
 
 // Data
 import {
   pages,
   satellites,
-  sectorColors,
   systemStatusList,
   techStackData,
-} from '@/data/home'
+} from "@/data/home";
 
-const router = useRouter()
+const router = useRouter();
 
 // 菜单状态
-const menuOpen = ref(false)
-const hoveredIndex = ref<number | null>(null)
+const menuOpen = ref(false);
+const hoveredIndex = ref<number | null>(null);
 
 // 使用组合式函数
 const {
@@ -44,47 +42,58 @@ const {
   hintsVisible,
   sidePanelsVisible,
   runEntrance,
-} = useEntrance()
+} = useEntrance();
 
-const { getSatelliteStyle, start: startOrbit, stop: stopOrbit } = useOrbitSatellites(satellites)
-const { hudTime, hudCoord, start: startHud, stop: stopHud } = useHudClock()
-const { showAlien, showUfo, bubbleHovered, onBubbleEnter, onBubbleLeave, cleanup: cleanupEasterEgg } = useGalaxyEasterEgg()
-const { getTrapPath, getLabelPos } = useArcMenuGeometry()
-const { starParticles, meteors, getStarStyle, getMeteorStyle } = useStarParticles()
+const {
+  getSatelliteStyle,
+  start: startOrbit,
+  stop: stopOrbit,
+} = useOrbitSatellites(satellites);
+const { hudTime, hudCoord, start: startHud, stop: stopHud } = useHudClock();
+const {
+  showAlien,
+  showUfo,
+  bubbleHovered,
+  onBubbleEnter,
+  onBubbleLeave,
+  cleanup: cleanupEasterEgg,
+} = useGalaxyEasterEgg();
+const { starParticles, meteors, getStarStyle, getMeteorStyle } =
+  useStarParticles();
 
 // 菜单操作
 function openMenu() {
-  if (!menuOpen.value) menuOpen.value = true
+  if (!menuOpen.value) menuOpen.value = true;
 }
 
 function closeMenu() {
-  if (menuOpen.value) menuOpen.value = false
+  if (menuOpen.value) menuOpen.value = false;
 }
 
 function onClickOutside(e: MouseEvent) {
-  const target = e.target as HTMLElement
-  if (target.closest('.radial-svg') || target.closest('.bubble')) return
-  closeMenu()
+  const target = e.target as HTMLElement;
+  if (target.closest(".holo-nav") || target.closest(".bubble")) return;
+  closeMenu();
 }
 
 function goToPage(id: number) {
-  router.push(`/page/${id}`)
+  router.push(`/page/${id}`);
 }
 
 // 生命周期
 onMounted(() => {
-  document.addEventListener('click', onClickOutside)
-  runEntrance()
-  startOrbit()
-  startHud()
-})
+  document.addEventListener("click", onClickOutside);
+  runEntrance();
+  startOrbit();
+  startHud();
+});
 
 onUnmounted(() => {
-  document.removeEventListener('click', onClickOutside)
-  stopOrbit()
-  stopHud()
-  cleanupEasterEgg()
-})
+  document.removeEventListener("click", onClickOutside);
+  stopOrbit();
+  stopHud();
+  cleanupEasterEgg();
+});
 </script>
 
 <template>
@@ -128,22 +137,42 @@ onUnmounted(() => {
     <div class="hud-layer" :class="{ 'hud--visible': hudVisible }">
       <div class="hud-corner hud-tl">
         <svg width="48" height="48" viewBox="0 0 48 48">
-          <path d="M2 16 L2 2 L16 2" fill="none" stroke="rgba(0,229,255,0.5)" stroke-width="1.5" />
+          <path
+            d="M2 16 L2 2 L16 2"
+            fill="none"
+            stroke="rgba(0,229,255,0.5)"
+            stroke-width="1.5"
+          />
         </svg>
       </div>
       <div class="hud-corner hud-tr">
         <svg width="48" height="48" viewBox="0 0 48 48">
-          <path d="M32 2 L46 2 L46 16" fill="none" stroke="rgba(0,229,255,0.5)" stroke-width="1.5" />
+          <path
+            d="M32 2 L46 2 L46 16"
+            fill="none"
+            stroke="rgba(0,229,255,0.5)"
+            stroke-width="1.5"
+          />
         </svg>
       </div>
       <div class="hud-corner hud-bl">
         <svg width="48" height="48" viewBox="0 0 48 48">
-          <path d="M2 32 L2 46 L16 46" fill="none" stroke="rgba(0,229,255,0.5)" stroke-width="1.5" />
+          <path
+            d="M2 32 L2 46 L16 46"
+            fill="none"
+            stroke="rgba(0,229,255,0.5)"
+            stroke-width="1.5"
+          />
         </svg>
       </div>
       <div class="hud-corner hud-br">
         <svg width="48" height="48" viewBox="0 0 48 48">
-          <path d="M32 46 L46 46 L46 32" fill="none" stroke="rgba(0,229,255,0.5)" stroke-width="1.5" />
+          <path
+            d="M32 46 L46 46 L46 32"
+            fill="none"
+            stroke="rgba(0,229,255,0.5)"
+            stroke-width="1.5"
+          />
         </svg>
       </div>
       <div class="hud-data hud-data-left">
@@ -225,11 +254,17 @@ onUnmounted(() => {
     <div class="hero-section" :class="{ 'hero--hidden': menuOpen }">
       <div class="hero-3d-wrap">
         <h1 class="hero-name" v-show="heroNameText">{{ heroNameText }}</h1>
-        <h1 class="hero-name hero-name-shadow" v-show="heroNameText" aria-hidden="true">
+        <h1
+          class="hero-name hero-name-shadow"
+          v-show="heroNameText"
+          aria-hidden="true"
+        >
           {{ heroNameText }}
         </h1>
       </div>
-      <p class="hero-role" v-show="heroRoleText">&lt; {{ heroRoleText }} /&gt;</p>
+      <p class="hero-role" v-show="heroRoleText">
+        &lt; {{ heroRoleText }} /&gt;
+      </p>
       <p class="hero-sub" v-show="heroSubText">{{ heroSubText }}</p>
     </div>
 
@@ -244,97 +279,74 @@ onUnmounted(() => {
         />
       </div>
 
-      <!-- 扇形菜单 SVG -->
-      <Transition name="menu">
-        <svg
-          v-if="menuOpen"
-          class="radial-svg"
-          viewBox="-240 -240 480 480"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <radialGradient id="glass-fill" cx="0" cy="0" r="220" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="white" stop-opacity="0.12" />
-              <stop offset="60%" stop-color="white" stop-opacity="0.06" />
-              <stop offset="100%" stop-color="white" stop-opacity="0.02" />
-            </radialGradient>
-          </defs>
+      <!-- 泡泡破裂碎片 -->
+      <Transition name="shards">
+        <div v-if="menuOpen" class="bubble-shards">
+          <div
+            v-for="n in 12"
+            :key="'shard-' + n"
+            class="shard"
+            :class="`shard--${n}`"
+            :style="{ animationDelay: `${(n - 1) * 25}ms` }"
+          />
+        </div>
+      </Transition>
 
-          <g
+      <!-- 破裂涟漪 -->
+      <Transition name="ripple">
+        <div v-if="menuOpen" class="burst-ripple">
+          <div class="ripple-ring ripple-ring--1" />
+          <div class="ripple-ring ripple-ring--2" />
+          <div class="ripple-ring ripple-ring--3" />
+        </div>
+      </Transition>
+
+      <!-- 全息导航选项 -->
+      <Transition name="holo-nav">
+        <div v-if="menuOpen" class="holo-nav">
+          <div
             v-for="(page, i) in pages"
             :key="page.id"
-            class="sector-group"
-            :class="{ 'sector-hovered': hoveredIndex === i }"
-            :style="{ animationDelay: `${i * 45}ms` }"
+            class="holo-item"
+            :class="{ 'holo-item--active': hoveredIndex === i }"
+            :style="{ animationDelay: `${250 + i * 80}ms` }"
             @mouseenter="hoveredIndex = i"
             @mouseleave="hoveredIndex = null"
             @click="goToPage(page.id)"
-            style="cursor: pointer"
           >
-            <path
-              :d="getTrapPath(i)"
-              :fill="hoveredIndex === i ? sectorColors[i].replace('0.18', '0.28') : sectorColors[i]"
-              style="transition: fill 0.3s ease"
-            />
-            <path
-              :d="getTrapPath(i)"
-              fill="url(#glass-fill)"
-              :opacity="hoveredIndex === i ? 1 : 0.6"
-              style="transition: opacity 0.3s ease"
-            />
-            <path
-              :d="getTrapPath(i)"
-              fill="none"
-              :stroke="hoveredIndex === i ? 'rgba(255,255,255,0.30)' : 'rgba(255,255,255,0.08)'"
-              stroke-width="0.8"
-              style="transition: stroke 0.3s ease"
-            />
-            <text
-              :x="getLabelPos(i).x"
-              :y="getLabelPos(i).y"
-              text-anchor="middle"
-              dominant-baseline="middle"
-              class="sector-label"
-              :class="{ 'sector-label--hover': hoveredIndex === i }"
-              style="pointer-events: none"
-            >
-              {{ page.label }}
-            </text>
-          </g>
-        </svg>
+            <span class="holo-text">{{ page.label }}</span>
+            <span class="holo-line" />
+          </div>
+        </div>
       </Transition>
 
       <!-- 中心透明泡泡 -->
-      <div
-        class="bubble"
-        :class="{ 'bubble--open': menuOpen, 'bubble--cyber': !menuOpen }"
-        @click="openMenu"
-        @mouseenter="onBubbleEnter"
-        @mouseleave="onBubbleLeave"
-      >
-        <div class="bubble-shine" />
-        <div class="bubble-hex-ring" v-show="!menuOpen" />
-        <span class="bubble-text">{{ menuOpen ? '' : 'EXPLORE' }}</span>
-      </div>
+      <Transition name="bubble-burst">
+        <div
+          v-if="!menuOpen"
+          class="bubble bubble--cyber"
+          @click="openMenu"
+          @mouseenter="onBubbleEnter"
+          @mouseleave="onBubbleLeave"
+        >
+          <div class="bubble-shine" />
+          <div class="bubble-hex-ring" />
+          <span class="bubble-text">EXPLORE</span>
+        </div>
+      </Transition>
 
       <!-- 菜单预览提示 -->
       <Transition name="hints">
         <div v-if="hintsVisible && !menuOpen" class="menu-hints">
-          <span v-for="p in pages" :key="p.id" class="hint-item">{{ p.label }}</span>
+          <span v-for="p in pages" :key="p.id" class="hint-item">{{
+            p.label
+          }}</span>
         </div>
       </Transition>
     </div>
-
-    <!-- 星河彩蛋 -->
-    <Transition name="alien-in">
-      <div v-if="showAlien" class="alien-egg"><span>👽</span></div>
-    </Transition>
-    <Transition name="ufo-in">
-      <div v-if="showUfo" class="ufo-egg"><span>🛸</span></div>
-    </Transition>
   </div>
 </template>
 
 <style scoped>
-@import '@/styles/views/home.scss';
+@import "@/styles/views/home.scss";
 </style>

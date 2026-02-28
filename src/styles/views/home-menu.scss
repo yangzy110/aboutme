@@ -1,62 +1,268 @@
 /**
- * HomeView SVG 环形菜单样式
+ * HomeView 泡泡破裂 + 悬浮卡片菜单样式
  */
 
-.radial-svg {
+/* ========== 泡泡破裂碎片 ========== */
+.bubble-shards {
   position: absolute;
-  width: 500px;
-  height: 500px;
+  width: 150px;
+  height: 150px;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.shard {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, 
+    rgba(0, 229, 255, 0.8) 0%,
+    rgba(120, 200, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  opacity: 0;
+  animation: shard-burst 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  box-shadow: 
+    0 0 15px rgba(0, 229, 255, 0.6),
+    inset 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* 12个碎片的不同方向和大小 */
+.shard--1 { --tx: -120px; --ty: -80px; --rot: 45deg; width: 18px; height: 18px; top: 45%; left: 45%; }
+.shard--2 { --tx: 80px; --ty: -100px; --rot: -30deg; width: 22px; height: 22px; top: 40%; left: 50%; }
+.shard--3 { --tx: 130px; --ty: 20px; --rot: 60deg; width: 16px; height: 16px; top: 50%; left: 55%; }
+.shard--4 { --tx: 100px; --ty: 110px; --rot: -45deg; width: 20px; height: 20px; top: 55%; left: 50%; }
+.shard--5 { --tx: -30px; --ty: 130px; --rot: 90deg; width: 24px; height: 24px; top: 60%; left: 45%; }
+.shard--6 { --tx: -140px; --ty: 60px; --rot: -60deg; width: 18px; height: 18px; top: 55%; left: 40%; }
+.shard--7 { --tx: -100px; --ty: -40px; --rot: 120deg; width: 14px; height: 14px; top: 48%; left: 42%; }
+.shard--8 { --tx: 60px; --ty: -60px; --rot: -90deg; width: 16px; height: 16px; top: 42%; left: 52%; }
+.shard--9 { --tx: 150px; --ty: -30px; --rot: 30deg; width: 12px; height: 12px; top: 46%; left: 58%; }
+.shard--10 { --tx: 70px; --ty: 90px; --rot: -120deg; width: 15px; height: 15px; top: 58%; left: 54%; }
+.shard--11 { --tx: -80px; --ty: 100px; --rot: 150deg; width: 17px; height: 17px; top: 62%; left: 44%; }
+.shard--12 { --tx: -150px; --ty: -20px; --rot: -150deg; width: 13px; height: 13px; top: 50%; left: 38%; }
+
+@keyframes shard-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.3);
+  }
+}
+
+/* ========== 破裂涟漪 ========== */
+.burst-ripple {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  pointer-events: none;
+  z-index: 14;
+}
+
+.ripple-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 229, 255, 0.6);
+  transform: translate(-50%, -50%);
+  animation: ripple-expand 0.8s ease-out forwards;
+}
+
+.ripple-ring--1 { animation-delay: 0ms; border-color: rgba(0, 229, 255, 0.7); }
+.ripple-ring--2 { animation-delay: 100ms; border-color: rgba(120, 200, 255, 0.5); }
+.ripple-ring--3 { animation-delay: 200ms; border-color: rgba(180, 140, 255, 0.4); }
+
+@keyframes ripple-expand {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+    border-width: 3px;
+  }
+  100% {
+    width: 400px;
+    height: 400px;
+    opacity: 0;
+    border-width: 1px;
+  }
+}
+
+/* ========== 全息导航卡片 ========== */
+.holo-nav {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 40px;
+  z-index: 20;
+}
+
+.holo-item {
+  position: relative;
+  width: 160px;
+  height: 200px;
+  cursor: pointer;
+  opacity: 0;
+  animation: holo-card-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  
+  /* 玻璃卡片背景 */
+  background: linear-gradient(
+    165deg,
+    rgba(0, 229, 255, 0.08) 0%,
+    rgba(60, 150, 200, 0.04) 50%,
+    rgba(100, 80, 180, 0.03) 100%
+  );
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  
+  overflow: hidden;
+}
+
+/* 高光反射层 */
+.holo-item::before {
+  content: '';
+  position: absolute;
   top: 0;
   left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    transparent 100%
+  );
+  border-radius: 16px 16px 0 0;
+  pointer-events: none;
 }
 
-.sector-group {
-  animation: sector-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+/* 底部发光线 */
+.holo-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 229, 255, 0.6) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.sector-group:hover {
-  filter: drop-shadow(0 0 12px rgba(120, 180, 255, 0.25));
-}
-
-@keyframes sector-in {
-  from {
+@keyframes holo-card-in {
+  0% {
     opacity: 0;
-    transform: scale(0.15);
-    transform-origin: 0 0;
-    filter: blur(4px);
+    transform: translateY(40px) scale(0.85);
+    filter: blur(12px);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: scale(1);
-    transform-origin: 0 0;
+    transform: translateY(0) scale(1);
     filter: blur(0);
   }
 }
 
-.sector-label {
-  font-size: 14px;
-  font-weight: 700;
-  fill: rgba(255, 255, 255, 0.85);
-  letter-spacing: 2px;
-  font-family: inherit;
-  transition: all 0.25s ease;
+.holo-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(0, 229, 255, 0.9);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  text-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
 }
 
-.sector-label--hover {
-  fill: #ffffff;
-  font-size: 15px;
-  letter-spacing: 2.5px;
+/* Hover 效果 */
+.holo-item:hover,
+.holo-item--active {
+  transform: translateY(-10px) scale(1.03);
+  border-color: rgba(0, 229, 255, 0.5);
+  box-shadow: 
+    0 10px 40px rgba(0, 229, 255, 0.15),
+    0 0 60px rgba(0, 229, 255, 0.1),
+    inset 0 0 30px rgba(0, 229, 255, 0.05);
+  
+  .holo-text {
+    color: rgba(0, 229, 255, 1);
+    text-shadow: 
+      0 0 10px rgba(0, 229, 255, 0.9),
+      0 0 30px rgba(0, 229, 255, 0.6);
+  }
+  
+  .holo-line {
+    opacity: 1;
+  }
 }
 
-.menu-enter-active {
+/* 过渡动画 */
+.holo-nav-enter-active {
+  /* 由子元素动画控制 */
+}
+
+.holo-nav-leave-active {
   transition: opacity 0.3s ease;
 }
-.menu-leave-active {
-  transition: opacity 0.2s ease;
-}
-.menu-enter-from,
-.menu-leave-to {
+
+.holo-nav-leave-to {
   opacity: 0;
+}
+
+/* ========== 过渡动画 ========== */
+.shards-enter-active,
+.ripple-enter-active {
+  /* 立即显示 */
+}
+
+.shards-leave-active,
+.ripple-leave-active {
+  transition: opacity 0.3s;
+}
+
+.shards-leave-to,
+.ripple-leave-to {
+  opacity: 0;
+}
+
+/* ========== 泡泡破裂过渡 ========== */
+.bubble-burst-leave-active {
+  transition: all 0.3s cubic-bezier(0.55, 0, 1, 0.45);
+}
+
+.bubble-burst-leave-to {
+  opacity: 0;
+  transform: scale(1.5);
+  filter: blur(10px);
+}
+
+.bubble-burst-enter-active {
+  transition: all 0.5s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+
+.bubble-burst-enter-from {
+  opacity: 0;
+  transform: scale(0.5);
 }
 
 /* 泡泡 */
