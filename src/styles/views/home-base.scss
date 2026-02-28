@@ -7,16 +7,7 @@
   width: 100%;
   overflow: hidden;
   position: relative;
-  background: linear-gradient(
-    180deg,
-    #000005 0%,
-    #010210 18%,
-    #030618 38%,
-    #050a22 55%,
-    #030618 72%,
-    #010210 88%,
-    #000005 100%
-  );
+  background: url('@/assets/footer-background.BIgtbvhx.jpg') center center / cover no-repeat;
   display: flex;
   flex-direction: column;
   align-items: center;
