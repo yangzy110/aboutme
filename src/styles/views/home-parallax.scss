@@ -1,0 +1,312 @@
+/**
+ * 2.5D 视差场景样式
+ * 多层视差效果，背景/中景/前景有相对运动
+ */
+
+.parallax-scene {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+// 光照覆盖层
+.parallax-lighting {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: background 0.3s ease;
+}
+
+// 通用层样式
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+  transition: filter 0.3s ease;
+}
+
+// ============================================
+// 背景图片层：最底层，缓慢移动
+// ============================================
+.layer-bg-image {
+  z-index: 0;
+}
+
+.bg-image-wrap {
+  position: absolute;
+  // 比视口大一些，留出移动空间
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+}
+
+.bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+// ============================================
+// 背景层：海洋与海鸟
+// ============================================
+.layer-bg {
+  z-index: 1;
+}
+
+.bg-ocean {
+  position: absolute;
+  bottom: 0;
+  left: -5%;
+  right: -5%;
+  height: 40%;
+  
+  .ocean-svg {
+    width: 110%;
+    height: 100%;
+    position: absolute;
+    bottom: 0;
+    left: -5%;
+  }
+}
+
+.bg-bird {
+  position: absolute;
+  width: 40px;
+  height: 20px;
+  animation: birdFly linear infinite;
+  
+  .bird-svg {
+    width: 100%;
+    height: 100%;
+  }
+  
+  @keyframes birdFly {
+    0% { transform: translateX(-100px); }
+    100% { transform: translateX(calc(100vw + 100px)); }
+  }
+}
+
+// ============================================
+// 中间层：热带装饰元素
+// ============================================
+.layer-mid {
+  z-index: 2;
+}
+
+.tropical-elements {
+  position: absolute;
+  inset: 0;
+}
+
+.tropical-leaf {
+  position: absolute;
+  width: 30px;
+  height: 40px;
+  animation: leafFall ease-in-out infinite;
+  
+  .leaf-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+  
+  @keyframes leafFall {
+    0% { 
+      transform: translateY(-20px) rotate(0deg);
+      opacity: 0;
+    }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { 
+      transform: translateY(calc(100vh + 40px)) rotate(360deg);
+      opacity: 0;
+    }
+  }
+}
+
+.butterfly {
+  position: absolute;
+  width: 40px;
+  height: 30px;
+  animation: butterflyFly 10s ease-in-out infinite;
+  
+  .butterfly-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 2px 6px rgba(255,200,100,0.4));
+  }
+  
+  @keyframes butterflyFly {
+    0%, 100% { 
+      transform: translate(0, 0) rotate(-5deg); 
+    }
+    25% { 
+      transform: translate(40px, -30px) rotate(5deg); 
+    }
+    50% { 
+      transform: translate(80px, 0) rotate(-5deg); 
+    }
+    75% { 
+      transform: translate(40px, 30px) rotate(5deg); 
+    }
+  }
+}
+
+.floating-cloud {
+  position: absolute;
+  width: 100px;
+  height: 40px;
+  animation: cloudFloat linear infinite;
+  
+  .cloud-svg {
+    width: 100%;
+    height: 100%;
+  }
+  
+  @keyframes cloudFloat {
+    0% { 
+      transform: translateX(-120px);
+      opacity: 0;
+    }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { 
+      transform: translateX(calc(100vw + 120px));
+      opacity: 0;
+    }
+  }
+}
+
+// ============================================
+// 前景层：人物剪影
+// ============================================
+.layer-fg {
+  z-index: 3;
+}
+
+.figure-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70vmin;
+  height: 70vmin;
+  max-width: 600px;
+  max-height: 600px;
+}
+
+.figure-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(255, 220, 150, 0.6));
+}
+
+.figure-aura {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 380px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 240, 200, 0.2) 0%,
+    rgba(255, 220, 150, 0.1) 40%,
+    transparent 70%
+  );
+  animation: auraBreath 4s ease-in-out infinite;
+  
+  @keyframes auraBreath {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  }
+}
+
+.figure-glow-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 220px;
+  height: 320px;
+  border: 1px solid rgba(255, 230, 180, 0.4);
+  border-radius: 50%;
+  animation: ringPulse 3s ease-in-out infinite;
+  
+  @keyframes ringPulse {
+    0%, 100% { 
+      transform: translate(-50%, -50%) scale(1); 
+      opacity: 0.5;
+      border-width: 1px;
+    }
+    50% { 
+      transform: translate(-50%, -50%) scale(1.05); 
+      opacity: 0.8;
+      border-width: 2px;
+    }
+  }
+}
+
+// ============================================
+// 最前层：近处粒子
+// ============================================
+.layer-particles {
+  z-index: 4;
+}
+
+.near-particle {
+  position: absolute;
+  width: var(--size, 4px);
+  height: var(--size, 4px);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 230, 150, 0.6) 50%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255, 240, 180, 0.5);
+  animation: sunParticleFloat 5s ease-in-out infinite, particleFade 3s ease-in-out infinite;
+  
+  @keyframes sunParticleFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(10px, -15px) rotate(90deg); }
+    50% { transform: translate(-5px, -25px) rotate(180deg); }
+    75% { transform: translate(-15px, -10px) rotate(270deg); }
+  }
+  
+  @keyframes particleFade {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+}
+
+// ============================================
+// 响应式调整
+// ============================================
+@media (max-width: 768px) {
+  .figure-container {
+    width: 150px;
+    height: 225px;
+    bottom: 5%;
+  }
+  
+  .figure-aura {
+    width: 200px;
+    height: 280px;
+  }
+  
+  .figure-glow-ring {
+    width: 160px;
+    height: 240px;
+  }
+  
+  .geo-shape {
+    transform: scale(0.7);
+  }
+}
